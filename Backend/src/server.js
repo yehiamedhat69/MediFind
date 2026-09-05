@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-// connectDB();
+connectDB();
 
 app.get("/", (req, res) => {
   res.json({ message: "MediFind API is running" });
