@@ -2,7 +2,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-const userRoutes = require("./routes/userRoutes");
 
 dotenv.config();
 
@@ -18,7 +17,12 @@ connectDB();
 app.get("/", (req, res) => {
   res.json({ message: "MediFind API is running" });
 });
-
+app.get("/api/protected", authenticateToken, (req, res) => {
+  res.json({
+    message: "You are authenticated",
+    user: req.user,
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
