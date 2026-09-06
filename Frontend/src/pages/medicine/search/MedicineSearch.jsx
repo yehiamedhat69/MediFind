@@ -2,6 +2,7 @@ import { useState } from "react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
 import SearchState from "./components/SearchState";
+import Pagination from "./components/Pagination";
 import { searchMedicines } from "../../../services/medicineService";
 import "./MedicineSearch.css";
 
@@ -29,10 +30,18 @@ function MedicineSearch() {
     availability: "all",
   });
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const RESULTS_PER_PAGE = 4;
+
   const handleSearch = async (term) => {
     setLoading(true);
     setError("");
     setSearched(true);
+
+    // Start from page 1 for every new search
+    setCurrentPage(1);
 
     try {
       const data = await searchMedicines(term);
@@ -56,6 +65,9 @@ function MedicineSearch() {
 
   const applyFilters = () => {
     setAppliedFilters(filters);
+
+    // Return to first page after changing filters
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -69,6 +81,9 @@ function MedicineSearch() {
 
     setFilters(defaultFilters);
     setAppliedFilters(defaultFilters);
+
+    // Return to first page after clearing filters
+    setCurrentPage(1);
   };
 
   const filteredResults = results.filter((medicine) => {
@@ -104,6 +119,33 @@ function MedicineSearch() {
     );
   });
 
+  // Calculate total pages
+  const totalPages = Math.ceil(
+    filteredResults.length / RESULTS_PER_PAGE
+  );
+
+  // Get results for current page
+  const startIndex =
+    (currentPage - 1) * RESULTS_PER_PAGE;
+
+  const endIndex =
+    startIndex + RESULTS_PER_PAGE;
+
+  const currentResults = filteredResults.slice(
+    startIndex,
+    endIndex
+  );
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+
+    // Scroll to the results section
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const renderResults = () => {
     if (loading) {
       return <SearchState type="loading" />;
@@ -124,16 +166,25 @@ function MedicineSearch() {
 
     if (filteredResults.length > 0) {
       return (
-        <SearchResults results={filteredResults} />
+        <>
+          <SearchResults results={currentResults} />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
       );
     }
 
     return (
       <div className="welcome-state">
         <h2>Find Your Medicine</h2>
+
         <p>
           Search for a medicine to find pharmacies where
-          it is available.
+          it is currently available.
         </p>
       </div>
     );
@@ -145,6 +196,7 @@ function MedicineSearch() {
 
         <header className="page-header">
           <h1>Find Your Medicine</h1>
+
           <p>
             Search for medicines and find pharmacies
             where they are currently available.
@@ -253,10 +305,14 @@ function MedicineSearch() {
                 value={filters.availability}
                 onChange={handleFilterChange}
               >
-                <option value="all">All</option>
+                <option value="all">
+                  All
+                </option>
+
                 <option value="available">
                   Available
                 </option>
+
                 <option value="unavailable">
                   Unavailable
                 </option>
