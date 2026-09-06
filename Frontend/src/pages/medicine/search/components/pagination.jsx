@@ -1,3 +1,4 @@
+import "./Pagination.css";
 function Pagination({
   currentPage,
   totalPages,
