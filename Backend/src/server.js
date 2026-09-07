@@ -10,7 +10,7 @@ const pharmacyRoutes = require("./routes/pharmacyRoutes");
 
 const authenticateToken = require("./middleware/authMiddleware");
 const inventoryRoutes = require("./routes/inventoryRoutes"); 
-
+const medicineSearchRoutes = require("./routes/medicineSearchRoutes");
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
@@ -23,7 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/pharmacies", pharmacyRoutes);
 app.use("/api/inventory", inventoryRoutes);
-
+app.use("/api/search", medicineSearchRoutes);
 connectDB();
 
 // Test route
