@@ -44,5 +44,5 @@ const medicineSchema = new mongoose.Schema(
     timestamps: true
   }
 );
-
+medicineSchema.index({ name: 1, category: 1 });
 module.exports = mongoose.model("Medicine", medicineSchema);

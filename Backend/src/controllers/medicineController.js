@@ -53,15 +53,62 @@ const getMedicine = async (req, res) => {
   }
 };
 
-// Get all medicines
+// Get all medicines (supports search, filter, pagination)
 const getAllMedicines = async (req, res) => {
   try {
-    const medicines = await Medicine.find();
+    const { name, category, page = 1, limit = 10 } = req.query;
 
-    res.status(200).json(medicines);
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+
+    // basic validation
+    if (isNaN(pageNumber) || pageNumber < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Page must be a positive number"
+      });
+    }
+
+    if (isNaN(limitNumber) || limitNumber < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Limit must be a positive number"
+      });
+    }
+
+    // build search/filter query
+    const query = {};
+
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+
+    if (category) {
+      query.category = { $regex: `^${category}$`, $options: "i" };
+    }
+
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const [medicines, totalCount] = await Promise.all([
+      Medicine.find(query).skip(skip).limit(limitNumber),
+      Medicine.countDocuments(query)
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: medicines,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalCount / limitNumber),
+        totalItems: totalCount,
+        itemsPerPage: limitNumber
+      }
+    });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to retrieve medicines"
+      success: false,
+      message: "Failed to retrieve medicines",
+      error: error.message
     });
   }
 };

@@ -7,9 +7,9 @@ const userRoutes = require("./routes/userRoutes");
 const medicineRoutes = require("./routes/medicineroutes");
 
 const authenticateToken = require("./middleware/authMiddleware");
+const path = require("path");
 
-dotenv.config({ path: "../.env"});
-
+dotenv.config({ path: path.join(__dirname, "../.env") });
 const app = express();
 
 app.use(express.json());
