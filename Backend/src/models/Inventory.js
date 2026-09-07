@@ -15,5 +15,4 @@ const inventorySchema = new mongoose.Schema(
 inventorySchema.index({ pharmacyId: 1, medicineId: 1 }, { unique: true });
 inventorySchema.index({ medicineId: 1, availability: 1 });
 inventorySchema.index({ pharmacyId: 1 });
-
 module.exports = mongoose.model('Inventory', inventorySchema);

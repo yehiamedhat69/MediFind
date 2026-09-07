@@ -9,6 +9,7 @@ const medicineRoutes = require("./routes/medicineroutes");
 const pharmacyRoutes = require("./routes/pharmacyRoutes");
 
 const authenticateToken = require("./middleware/authMiddleware");
+const inventoryRoutes = require("./routes/inventoryRoutes"); 
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -21,6 +22,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/pharmacies", pharmacyRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 connectDB();
 
