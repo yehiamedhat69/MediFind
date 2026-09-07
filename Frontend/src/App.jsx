@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -9,14 +8,12 @@ import {
 
 import ProtectedRoute from "./rout/protectroutes";
 
-// Medicine Search
 import MedicineSearch from "./pages/medicine/search/MedicineSearch";
 
-// Temporary pages for testing Task 3
-function LoginPage() {
-  return <h2>Login Page - Task 2</h2>;
-}
+import Login from "./pages/authentication/Login/Login";
+import Register from "./pages/authentication/Register/Register";
 
+// Temporary pages for testing other tasks
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
 }
@@ -38,9 +35,7 @@ function App() {
     <Router>
       <Routes>
 
-        {/* =========================
-            PUBLIC ROUTES
-        ========================== */}
+        {/* Public Routes */}
 
         <Route
           path="/medicine-search"
@@ -49,7 +44,12 @@ function App() {
 
         <Route
           path="/login"
-          element={<LoginPage />}
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
         />
 
         <Route
@@ -57,9 +57,7 @@ function App() {
           element={<UnauthorizedPage />}
         />
 
-        {/* =========================
-            CUSTOMER ROUTES
-        ========================== */}
+        {/* Customer Routes */}
 
         <Route
           element={
@@ -72,9 +70,7 @@ function App() {
           />
         </Route>
 
-        {/* =========================
-            PHARMACY ROUTES
-        ========================== */}
+        {/* Pharmacy Routes */}
 
         <Route
           element={
@@ -87,9 +83,7 @@ function App() {
           />
         </Route>
 
-        {/* =========================
-            ADMIN ROUTES
-        ========================== */}
+        {/* Admin Routes */}
 
         <Route
           element={
@@ -102,9 +96,7 @@ function App() {
           />
         </Route>
 
-        {/* =========================
-            DEFAULT ROUTE
-        ========================== */}
+        {/* Default */}
 
         <Route
           path="/"
@@ -112,10 +104,6 @@ function App() {
             <Navigate to="/medicine-search" replace />
           }
         />
-
-        {/* =========================
-            UNKNOWN ROUTES
-        ========================== */}
 
         <Route
           path="*"
