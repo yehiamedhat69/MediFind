@@ -1,48 +1,16 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const medicineSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 100
-    },
-
-    description: {
-      type: String,
-      required: true,
-      minlength: 5
-    },
-
-    price: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-
-    quantity: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-
-    expiryDate: {
-      type: Date,
-      required: true
-    },
-
-    category: {
-      type: String,
-      required: true,
-      trim: true
-    }
+    name: { type: String, required: true, trim: true },
+    genericName: { type: String, trim: true },
+    description: { type: String, trim: true },
+    category: { type: String, trim: true },
+    isActive: { type: Boolean, default: true }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
-medicineSchema.index({ name: 1, category: 1 });
-module.exports = mongoose.model("Medicine", medicineSchema);
+
+medicineSchema.index({ name: 'text', genericName: 'text' });
+
+module.exports = mongoose.model('Medicine', medicineSchema);
