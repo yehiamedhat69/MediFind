@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:5000/api";
+
 const pharmacies = [
   {
     id: 1,
@@ -145,8 +147,7 @@ export const getPharmacyById = (pharmacyId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const pharmacy = pharmacies.find(
-        (pharmacy) =>
-          pharmacy.id === Number(pharmacyId)
+        (pharmacy) => pharmacy.id === Number(pharmacyId)
       );
 
       resolve(pharmacy || null);
@@ -154,15 +155,11 @@ export const getPharmacyById = (pharmacyId) => {
   });
 };
 
-export const getMedicineAvailability = (
-  pharmacyId,
-  medicineId
-) => {
+export const getMedicineAvailability = (pharmacyId, medicineId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const pharmacy = pharmacies.find(
-        (pharmacy) =>
-          pharmacy.id === Number(pharmacyId)
+        (pharmacy) => pharmacy.id === Number(pharmacyId)
       );
 
       if (!pharmacy) {
@@ -171,11 +168,22 @@ export const getMedicineAvailability = (
       }
 
       const medicine = pharmacy.medicines.find(
-        (medicine) =>
-          medicine.medicineId === Number(medicineId)
+        (medicine) => medicine.medicineId === Number(medicineId)
       );
 
       resolve(medicine || null);
     }, 700);
   });
+};
+
+export const getPharmacyDashboard = async () => {
+  const response = await fetch(`${API_BASE_URL}/pharmacy/dashboard`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch pharmacy dashboard");
+  }
+
+  return response.json();
 };
