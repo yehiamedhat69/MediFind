@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -11,6 +10,9 @@ import ProtectedRoute from "./rout/protectroutes";
 
 // Medicine Search
 import MedicineSearch from "./pages/medicine/search/MedicineSearch";
+
+// Pharmacy Notifications
+import PharmacyNotifications from "./pages/PharmacyNotifications";
 
 // Temporary pages for testing Task 3
 function LoginPage() {
@@ -84,6 +86,11 @@ function App() {
           <Route
             path="/pharmacy/dashboard"
             element={<PharmacyDashboard />}
+          />
+
+          <Route
+            path="/pharmacy/notifications"
+            element={<PharmacyNotifications />}
           />
         </Route>
 
