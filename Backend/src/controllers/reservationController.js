@@ -2,6 +2,7 @@ const Reservation = require("../models/Reservation");
 const Inventory = require("../models/Inventory");
 const Medicine = require("../models/medicine");
 const Pharmacy = require("../models/Pharmacy");
+const Notification = require("../models/Notification");
 
 // CREATE RESERVATION
 const createReservation = async (req, res) => {
@@ -60,7 +61,6 @@ const createReservation = async (req, res) => {
       });
     }
 
-    // Decrease inventory quantity
     inventory.quantity -= quantity;
 
     if (inventory.quantity === 0) {
@@ -78,6 +78,14 @@ const createReservation = async (req, res) => {
       status: "pending",
     });
 
+    await Notification.create({
+      userId: customerId,
+      reservationId: reservation._id,
+      medicineId,
+      type: "reservation_created",
+      message: "Your reservation has been created successfully.",
+    });
+
     return res.status(201).json({
       success: true,
       message: "Reservation created successfully",
@@ -93,7 +101,6 @@ const createReservation = async (req, res) => {
     });
   }
 };
-
 
 // GET MY RESERVATIONS
 const getMyReservations = async (req, res) => {
@@ -117,7 +124,6 @@ const getMyReservations = async (req, res) => {
     });
   }
 };
-
 
 // GET PHARMACY RESERVATIONS
 const getPharmacyReservations = async (req, res) => {
@@ -153,7 +159,6 @@ const getPharmacyReservations = async (req, res) => {
     });
   }
 };
-
 
 // UPDATE RESERVATION STATUS
 const updateReservationStatus = async (req, res) => {
@@ -214,11 +219,35 @@ const updateReservationStatus = async (req, res) => {
       if (inventory) {
         inventory.quantity += reservation.quantity;
         inventory.availability = true;
+
         await inventory.save();
+
+        // Medicine availability notification
+        await Notification.create({
+          userId: reservation.customerId,
+          reservationId: reservation._id,
+          medicineId: reservation.medicineId,
+          type: "medicine_available",
+          message: "The medicine is available again.",
+        });
       }
     }
 
     await reservation.save();
+
+    const notificationMessages = {
+      accepted: "Your reservation has been accepted.",
+      rejected: "Your reservation has been rejected.",
+      fulfilled: "Your reservation has been fulfilled.",
+    };
+
+    await Notification.create({
+      userId: reservation.customerId,
+      reservationId: reservation._id,
+      medicineId: reservation.medicineId,
+      type: `reservation_${status}`,
+      message: notificationMessages[status],
+    });
 
     return res.status(200).json({
       success: true,
@@ -226,6 +255,8 @@ const updateReservationStatus = async (req, res) => {
       reservation,
     });
   } catch (error) {
+    console.error(error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to update reservation status",
@@ -233,7 +264,6 @@ const updateReservationStatus = async (req, res) => {
     });
   }
 };
-
 
 // CANCEL RESERVATION
 const cancelReservation = async (req, res) => {
@@ -261,7 +291,6 @@ const cancelReservation = async (req, res) => {
 
     reservation.status = "cancelled";
 
-    // Return quantity to inventory
     const inventory = await Inventory.findOne({
       pharmacyId: reservation.pharmacyId,
       medicineId: reservation.medicineId,
@@ -270,10 +299,19 @@ const cancelReservation = async (req, res) => {
     if (inventory) {
       inventory.quantity += reservation.quantity;
       inventory.availability = true;
+
       await inventory.save();
     }
 
     await reservation.save();
+
+    await Notification.create({
+      userId: customerId,
+      reservationId: reservation._id,
+      medicineId: reservation.medicineId,
+      type: "reservation_cancelled",
+      message: "Your reservation has been cancelled successfully.",
+    });
 
     return res.status(200).json({
       success: true,
@@ -281,6 +319,8 @@ const cancelReservation = async (req, res) => {
       reservation,
     });
   } catch (error) {
+    console.error(error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to cancel reservation",
@@ -288,7 +328,6 @@ const cancelReservation = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createReservation,

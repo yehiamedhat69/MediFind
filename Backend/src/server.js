@@ -17,6 +17,8 @@ const app = express();
 
 const reservationRoutes = require("./routes/reservationRoutes");
 
+const notificationRoutes = require("./routes/notificationRoutes");
+
 app.use(express.json());
 
 // Routes
@@ -26,6 +28,7 @@ app.use("/api/medicines", medicineRoutes);
 app.use("/api/pharmacies", pharmacyRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/search", medicineSearchRoutes);
+app.use("/api/notifications", notificationRoutes);
 connectDB();
 
 // Test route
