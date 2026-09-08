@@ -6,7 +6,7 @@
 }
 
 .search-container {
-  max-width: 1400px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -66,79 +66,6 @@
   cursor: not-allowed;
 }
 
-.search-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 30px;
-  align-items: start;
-}
-
-.filters-sidebar {
-  background: white;
-  padding: 22px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  position: sticky;
-  top: 20px;
-}
-
-.filters-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.filters-header h2 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.filters-header button {
-  border: none;
-  background: none;
-  color: #2563eb;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.filter-group {
-  margin-bottom: 22px;
-}
-
-.filter-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.filter-group input,
-.filter-group select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-  box-sizing: border-box;
-  outline: none;
-}
-
-.range-inputs {
-  display: flex;
-  gap: 8px;
-}
-
-.apply-filters-button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 7px;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .results-container {
   min-width: 0;
 }
@@ -166,7 +93,7 @@
 
 .medicine-card {
   background: white;
-  padding: 22px;
+  padding: 24px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
 }
@@ -179,67 +106,25 @@
 }
 
 .card-top h3 {
-  margin: 0 0 7px;
-  font-size: 21px;
+  margin: 0 0 8px;
+  font-size: 22px;
   color: #111827;
 }
 
 .card-top p {
   margin: 0;
   color: #6b7280;
-}
-
-.availability {
-  height: fit-content;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.available {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.unavailable {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.medicine-details {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  padding: 18px 0;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.medicine-details div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.medicine-details span {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.medicine-details strong {
-  color: #111827;
+  line-height: 1.6;
 }
 
 .card-actions {
   display: flex;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 .card-actions button {
-  padding: 10px 15px;
+  padding: 11px 18px;
   border: none;
   border-radius: 7px;
   background: #2563eb;
@@ -248,10 +133,8 @@
   cursor: pointer;
 }
 
-.card-actions .secondary-button {
-  background: white;
-  color: #2563eb;
-  border: 1px solid #2563eb;
+.card-actions button:hover {
+  background: #1d4ed8;
 }
 
 .welcome-state,
@@ -294,20 +177,6 @@
   }
 }
 
-@media (max-width: 900px) {
-  .search-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .filters-sidebar {
-    position: static;
-  }
-
-  .medicine-details {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 600px) {
   .medicine-search-page {
     padding: 25px 15px;
@@ -329,19 +198,7 @@
     flex-direction: column;
   }
 
-  .medicine-details {
-    grid-template-columns: 1fr;
-  }
-
-  .card-actions {
-    flex-direction: column;
-  }
-
   .card-actions button {
     width: 100%;
-  }
-
-  .range-inputs {
-    flex-direction: column;
   }
 }

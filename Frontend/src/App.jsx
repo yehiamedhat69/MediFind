@@ -9,11 +9,14 @@ import {
 import ProtectedRoute from "./rout/protectroutes";
 
 import MedicineSearch from "./pages/medicine/search/MedicineSearch";
+import MedicineDetails from "./pages/medicine/details/MedicineDetails";
+import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
 
 import Login from "./pages/authentication/Login/Login";
 import Register from "./pages/authentication/Register/Register";
 
 // Temporary pages for testing other tasks
+
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
 }
@@ -40,6 +43,16 @@ function App() {
         <Route
           path="/medicine-search"
           element={<MedicineSearch />}
+        />
+
+        <Route
+          path="/medicine/:medicineId"
+          element={<MedicineDetails />}
+        />
+
+        <Route
+          path="/pharmacy/:pharmacyId"
+          element={<PharmacyDetails />}
         />
 
         <Route
@@ -96,19 +109,27 @@ function App() {
           />
         </Route>
 
-        {/* Default */}
+        {/* Default Route */}
 
         <Route
           path="/"
           element={
-            <Navigate to="/medicine-search" replace />
+            <Navigate
+              to="/medicine-search"
+              replace
+            />
           }
         />
+
+        {/* Fallback */}
 
         <Route
           path="*"
           element={
-            <Navigate to="/medicine-search" replace />
+            <Navigate
+              to="/medicine-search"
+              replace
+            />
           }
         />
 

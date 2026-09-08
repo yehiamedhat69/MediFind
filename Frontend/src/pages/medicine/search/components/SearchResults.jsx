@@ -5,7 +5,10 @@ function SearchResults({ results }) {
     <div className="results-wrapper">
       <div className="results-header">
         <h2>Search Results</h2>
-        <span>{results.length} result(s)</span>
+
+        <span>
+          {results.length} result(s)
+        </span>
       </div>
 
       <div className="results-list">
