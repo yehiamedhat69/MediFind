@@ -15,6 +15,10 @@ import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
 import Login from "./pages/authentication/Login/Login";
 import Register from "./pages/authentication/Register/Register";
 
+// Task 11 - Pharmacy Profile & Inventory
+import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
+import InventoryManagement from "./pages/pharmacy/InventoryManagement";
+
 // Temporary pages for testing other tasks
 
 function UnauthorizedPage() {
@@ -93,6 +97,18 @@ function App() {
           <Route
             path="/pharmacy/dashboard"
             element={<PharmacyDashboard />}
+          />
+
+          {/* Task 11 - Pharmacy Profile */}
+          <Route
+            path="/pharmacy/profile"
+            element={<PharmacyProfile />}
+          />
+
+          {/* Task 11 - Inventory Management */}
+          <Route
+            path="/pharmacy/inventory"
+            element={<InventoryManagement />}
           />
         </Route>
 
