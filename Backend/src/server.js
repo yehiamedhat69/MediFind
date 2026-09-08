@@ -15,6 +15,8 @@ dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 
+const reservationRoutes = require("./routes/reservationRoutes");
+
 app.use(express.json());
 
 // Routes
@@ -38,6 +40,7 @@ app.get("/api/protected", authenticateToken, (req, res) => {
     user: req.user,
   });
 });
+app.use("/reservations", reservationRoutes);
 
 const PORT = process.env.PORT || 3000;
 
