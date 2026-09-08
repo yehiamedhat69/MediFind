@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Login.css";
 
+import { loginUser } from "../../../services/authService";
+
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,6 +27,7 @@ function Login() {
     setErrors((prev) => ({
       ...prev,
       [name]: "",
+      general: "",
     }));
   };
 
@@ -46,7 +49,7 @@ function Login() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validate();
@@ -56,14 +59,25 @@ function Login() {
       return;
     }
 
-    // API integration will be added later.
-    console.log("Login data:", formData);
+    try {
+      const data = await loginUser(
+        formData.email,
+        formData.password
+      );
 
-    // Temporary navigation for UI testing.
-    const destination =
-      location.state?.from?.pathname || "/medicine-search";
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    navigate(destination);
+      const destination =
+        location.state?.from?.pathname ||
+        `/${data.user.role}/dashboard`;
+
+      navigate(destination, { replace: true });
+    } catch (error) {
+      setErrors({
+        general: error.message,
+      });
+    }
   };
 
   return (
@@ -87,6 +101,7 @@ function Login() {
         </div>
 
         <div className="auth-card">
+
           <div className="auth-header">
             <h2>Welcome Back</h2>
             <p>Sign in to continue to MediFind</p>
@@ -95,7 +110,9 @@ function Login() {
           <form onSubmit={handleSubmit} className="auth-form">
 
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+              <label htmlFor="email">
+                Email Address
+              </label>
 
               <input
                 id="email"
@@ -115,19 +132,25 @@ function Login() {
             </div>
 
             <div className="form-group">
+
               <div className="password-label-row">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">
+                  Password
+                </label>
 
                 <button
                   type="button"
                   className="forgot-password"
-                  onClick={() => alert("Forgot password will be added later.")}
+                  onClick={() =>
+                    alert("Forgot password will be added later.")
+                  }
                 >
                   Forgot Password?
                 </button>
               </div>
 
               <div className="password-input-wrapper">
+
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -135,17 +158,22 @@ function Login() {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={errors.password ? "input-error" : ""}
+                  className={
+                    errors.password ? "input-error" : ""
+                  }
                 />
 
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   aria-label="Toggle password visibility"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
+
               </div>
 
               {errors.password && (
@@ -155,9 +183,19 @@ function Login() {
               )}
             </div>
 
-            <button type="submit" className="auth-submit">
+            {errors.general && (
+              <span className="error-message">
+                {errors.general}
+              </span>
+            )}
+
+            <button
+              type="submit"
+              className="auth-submit"
+            >
               Sign In
             </button>
+
           </form>
 
           <div className="auth-divider">
@@ -166,10 +204,12 @@ function Login() {
 
           <p className="auth-switch">
             Don't have an account?{" "}
-            <Link to="/register">Create an account</Link>
+            <Link to="/register">
+              Create an account
+            </Link>
           </p>
-        </div>
 
+        </div>
       </div>
     </div>
   );

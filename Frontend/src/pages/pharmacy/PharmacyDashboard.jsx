@@ -1,25 +1,41 @@
 import { useEffect, useState } from "react";
-import { getPharmacyDashboard } from "../../services/pharmacyService";
 import "./PharmacyDashboard.css";
+
+const mockDashboard = {
+  pharmacy: {
+    name: "Test Pharmacy",
+    phone: "013-1234567",
+    address: "Benha, Qalyubia",
+  },
+
+  inventory: {
+    availableMedicines: 7,
+    totalStock: 79,
+    lowStock: 2,
+  },
+
+  reservations: {
+    pending: 3,
+    confirmed: 5,
+    completed: 12,
+    cancelled: 1,
+    total: 21,
+  },
+};
 
 const PharmacyDashboard = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
+    // Temporary mock data until the backend is ready.
     const loadDashboard = async () => {
-      try {
-        setLoading(true);
-        setError("");
+      setLoading(true);
 
-        const data = await getPharmacyDashboard();
-        setDashboard(data);
-      } catch (err) {
-        setError("Unable to load dashboard data.");
-      } finally {
+      setTimeout(() => {
+        setDashboard(mockDashboard);
         setLoading(false);
-      }
+      }, 500);
     };
 
     loadDashboard();
@@ -30,15 +46,6 @@ const PharmacyDashboard = () => {
       <div className="dashboard-state">
         <div className="loader"></div>
         <p>Loading dashboard...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="dashboard-state error-state">
-        <h2>Something went wrong</h2>
-        <p>{error}</p>
       </div>
     );
   }
@@ -60,7 +67,9 @@ const PharmacyDashboard = () => {
       <section className="welcome-section">
         <div>
           <p className="welcome-label">Welcome back</p>
+
           <h1>{pharmacy?.name || "Pharmacy"}</h1>
+
           <p>
             Manage your pharmacy, inventory and reservations
             from one place.
@@ -79,25 +88,34 @@ const PharmacyDashboard = () => {
         </div>
 
         <div className="info-grid">
+
           <div className="info-card">
             <span>Pharmacy Name</span>
-            <strong>{pharmacy?.name || "N/A"}</strong>
+            <strong>
+              {pharmacy?.name || "N/A"}
+            </strong>
           </div>
 
           <div className="info-card">
             <span>Phone</span>
-            <strong>{pharmacy?.phone || "N/A"}</strong>
+            <strong>
+              {pharmacy?.phone || "N/A"}
+            </strong>
           </div>
 
           <div className="info-card">
             <span>Address</span>
-            <strong>{pharmacy?.address || "N/A"}</strong>
+            <strong>
+              {pharmacy?.address || "N/A"}
+            </strong>
           </div>
+
         </div>
       </section>
 
       {/* Inventory */}
       <section className="section">
+
         <div className="section-header">
           <h2>Inventory Overview</h2>
 
@@ -110,25 +128,37 @@ const PharmacyDashboard = () => {
 
           <div className="stat-card">
             <div className="stat-icon">M</div>
+
             <div>
               <span>Available Medicines</span>
-              <strong>{inventory?.availableMedicines ?? 0}</strong>
+
+              <strong>
+                {inventory?.availableMedicines ?? 0}
+              </strong>
             </div>
           </div>
 
           <div className="stat-card">
             <div className="stat-icon">S</div>
+
             <div>
               <span>Total Stock</span>
-              <strong>{inventory?.totalStock ?? 0}</strong>
+
+              <strong>
+                {inventory?.totalStock ?? 0}
+              </strong>
             </div>
           </div>
 
           <div className="stat-card">
             <div className="stat-icon">L</div>
+
             <div>
               <span>Low Stock</span>
-              <strong>{inventory?.lowStock ?? 0}</strong>
+
+              <strong>
+                {inventory?.lowStock ?? 0}
+              </strong>
             </div>
           </div>
 
@@ -137,6 +167,7 @@ const PharmacyDashboard = () => {
         {inventory?.availableMedicines === 0 && (
           <div className="empty-state">
             <h3>No inventory yet</h3>
+
             <p>
               Add medicines to your inventory to see them here.
             </p>
@@ -146,10 +177,12 @@ const PharmacyDashboard = () => {
             </button>
           </div>
         )}
+
       </section>
 
       {/* Reservations */}
       <section className="section">
+
         <div className="section-header">
           <h2>Reservations</h2>
 
@@ -162,38 +195,55 @@ const PharmacyDashboard = () => {
 
           <div className="reservation-card">
             <span>Pending</span>
-            <strong>{reservations?.pending ?? 0}</strong>
+
+            <strong>
+              {reservations?.pending ?? 0}
+            </strong>
           </div>
 
           <div className="reservation-card">
             <span>Confirmed</span>
-            <strong>{reservations?.confirmed ?? 0}</strong>
+
+            <strong>
+              {reservations?.confirmed ?? 0}
+            </strong>
           </div>
 
           <div className="reservation-card">
             <span>Completed</span>
-            <strong>{reservations?.completed ?? 0}</strong>
+
+            <strong>
+              {reservations?.completed ?? 0}
+            </strong>
           </div>
 
           <div className="reservation-card">
             <span>Cancelled</span>
-            <strong>{reservations?.cancelled ?? 0}</strong>
+
+            <strong>
+              {reservations?.cancelled ?? 0}
+            </strong>
           </div>
 
         </div>
 
         {reservations?.total === 0 && (
           <div className="empty-state">
+
             <h3>No reservations</h3>
+
             <p>
               There are currently no reservations for your pharmacy.
             </p>
+
           </div>
         )}
+
       </section>
 
       {/* Quick Navigation */}
       <section className="section">
+
         <div className="section-header">
           <h2>Quick Access</h2>
         </div>
@@ -202,25 +252,38 @@ const PharmacyDashboard = () => {
 
           <button className="quick-link">
             <strong>Pharmacy Profile</strong>
-            <span>View and edit pharmacy information</span>
+
+            <span>
+              View and edit pharmacy information
+            </span>
           </button>
 
           <button className="quick-link">
             <strong>Inventory Management</strong>
-            <span>Manage available medicines and stock</span>
+
+            <span>
+              Manage available medicines and stock
+            </span>
           </button>
 
           <button className="quick-link">
             <strong>Reservation Management</strong>
-            <span>View and manage reservations</span>
+
+            <span>
+              View and manage reservations
+            </span>
           </button>
 
           <button className="quick-link">
             <strong>Notifications</strong>
-            <span>View pharmacy notifications</span>
+
+            <span>
+              View pharmacy notifications
+            </span>
           </button>
 
         </div>
+
       </section>
 
     </div>

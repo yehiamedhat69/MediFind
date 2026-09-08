@@ -11,6 +11,7 @@ import ProtectedRoute from "./rout/protectroutes";
 import MedicineSearch from "./pages/medicine/search/MedicineSearch";
 import MedicineDetails from "./pages/medicine/details/MedicineDetails";
 import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
+import PharmacyDashboard from "./pages/pharmacy/PharmacyDashboard";
 
 import Login from "./pages/authentication/Login/Login";
 import Register from "./pages/authentication/Register/Register";
@@ -23,10 +24,6 @@ function UnauthorizedPage() {
 
 function CustomerDashboard() {
   return <h2>Customer Dashboard - Task 4</h2>;
-}
-
-function PharmacyDashboard() {
-  return <h2>Pharmacy Dashboard - Task 10</h2>;
 }
 
 function AdminDashboard() {
