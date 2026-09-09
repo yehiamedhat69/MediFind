@@ -1,16 +1,23 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const medicineRoutes = require("./routes/medicineroutes");
+const pharmacyRoutes = require("./routes/pharmacyRoutes");
 
 const authenticateToken = require("./middleware/authMiddleware");
-
-dotenv.config({ path: "../.env"});
+const inventoryRoutes = require("./routes/inventoryRoutes"); 
+const medicineSearchRoutes = require("./routes/medicineSearchRoutes");
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
+
+const reservationRoutes = require("./routes/reservationRoutes");
+
+const notificationRoutes = require("./routes/notificationRoutes");
 
 app.use(express.json());
 
@@ -18,7 +25,10 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/medicines", medicineRoutes);
-
+app.use("/api/pharmacies", pharmacyRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/search", medicineSearchRoutes);
+app.use("/api/notifications", notificationRoutes);
 connectDB();
 
 // Test route
@@ -33,6 +43,7 @@ app.get("/api/protected", authenticateToken, (req, res) => {
     user: req.user,
   });
 });
+app.use("/reservations", reservationRoutes);
 
 const PORT = process.env.PORT || 3000;
 

@@ -8,16 +8,23 @@ import {
 
 import ProtectedRoute from "./rout/protectroutes";
 
-// Medicine Search
 import MedicineSearch from "./pages/medicine/search/MedicineSearch";
+import MedicineDetails from "./pages/medicine/details/MedicineDetails";
+import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
 
-// Pharmacy Notifications
 import PharmacyNotifications from "./pages/PharmacyNotifications";
 
-// Temporary pages for testing Task 3
-function LoginPage() {
-  return <h2>Login Page - Task 2</h2>;
-}
+import Login from "./pages/authentication/Login/Login";
+import Register from "./pages/authentication/Register/Register";
+
+import MedicineReservation from "./pages/reservation/MedicineReservation";
+
+import CustomerReservations from "./pages/reservation/CustomerReservations";
+import CustomerNotifications from "./pages/notifications/CustomerNotifications";
+
+// Task 11 - Pharmacy Profile & Inventory
+import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
+import InventoryManagement from "./pages/pharmacy/InventoryManagement";
 
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
@@ -39,10 +46,14 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Medicine Reservation */}
 
-        {/* =========================
-            PUBLIC ROUTES
-        ========================== */}
+        <Route
+          path="/reservation/:medicineId/:pharmacyId"
+          element={<MedicineReservation />}
+        />
+
+        {/* Public Routes */}
 
         <Route
           path="/medicine-search"
@@ -50,8 +61,23 @@ function App() {
         />
 
         <Route
+          path="/medicine/:medicineId"
+          element={<MedicineDetails />}
+        />
+
+        <Route
+          path="/pharmacy/:pharmacyId"
+          element={<PharmacyDetails />}
+        />
+
+        <Route
           path="/login"
-          element={<LoginPage />}
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
         />
 
         <Route
@@ -59,9 +85,7 @@ function App() {
           element={<UnauthorizedPage />}
         />
 
-        {/* =========================
-            CUSTOMER ROUTES
-        ========================== */}
+        {/* Customer Routes */}
 
         <Route
           element={
@@ -72,11 +96,19 @@ function App() {
             path="/customer/dashboard"
             element={<CustomerDashboard />}
           />
+
+          <Route
+            path="/customer/reservations"
+            element={<CustomerReservations />}
+          />
+
+          <Route
+            path="/customer/notifications"
+            element={<CustomerNotifications />}
+          />
         </Route>
 
-        {/* =========================
-            PHARMACY ROUTES
-        ========================== */}
+        {/* Pharmacy Routes */}
 
         <Route
           element={
@@ -92,11 +124,23 @@ function App() {
             path="/pharmacy/notifications"
             element={<PharmacyNotifications />}
           />
+
+          {/* Task 11 - Pharmacy Profile */}
+
+          <Route
+            path="/pharmacy/profile"
+            element={<PharmacyProfile />}
+          />
+
+          {/* Task 11 - Inventory Management */}
+
+          <Route
+            path="/pharmacy/inventory"
+            element={<InventoryManagement />}
+          />
         </Route>
 
-        {/* =========================
-            ADMIN ROUTES
-        ========================== */}
+        {/* Admin Routes */}
 
         <Route
           element={
@@ -109,28 +153,29 @@ function App() {
           />
         </Route>
 
-        {/* =========================
-            DEFAULT ROUTE
-        ========================== */}
+        {/* Default Route */}
 
         <Route
           path="/"
           element={
-            <Navigate to="/medicine-search" replace />
+            <Navigate
+              to="/login"
+              replace
+            />
           }
         />
 
-        {/* =========================
-            UNKNOWN ROUTES
-        ========================== */}
+        {/* Fallback */}
 
         <Route
           path="*"
           element={
-            <Navigate to="/medicine-search" replace />
+            <Navigate
+              to="/medicine-search"
+              replace
+            />
           }
         />
-
       </Routes>
     </Router>
   );
