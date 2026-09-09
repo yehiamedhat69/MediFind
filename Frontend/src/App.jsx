@@ -15,6 +15,8 @@ import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
 import Login from "./pages/authentication/Login/Login";
 import Register from "./pages/authentication/Register/Register";
 
+import MedicineReservation from "./pages/reservation/MedicineReservation";
+
 // Task 11 - Pharmacy Profile & Inventory
 import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
 import InventoryManagement from "./pages/pharmacy/InventoryManagement";
@@ -42,6 +44,10 @@ function App() {
     <Router>
       <Routes>
 
+        <Route
+          path="/reservation/:medicineId/:pharmacyId"
+          element={<MedicineReservation />}
+        />
         {/* Public Routes */}
 
         <Route

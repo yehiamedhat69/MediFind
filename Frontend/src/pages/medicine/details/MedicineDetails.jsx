@@ -135,11 +135,11 @@ function MedicineDetails() {
     );
   };
 
-  const handleReservation = (pharmacy) => {
-    alert(
-      `Reservation started for ${medicine.name} at ${pharmacy.name}.`
-    );
-  };
+const handleReservation = (pharmacy) => {
+  navigate(
+    `/reservation/${medicineId}/${pharmacy.id}`
+  );
+};
 
   if (loading) {
     return (

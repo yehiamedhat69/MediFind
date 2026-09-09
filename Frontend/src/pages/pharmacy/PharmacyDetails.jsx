@@ -112,15 +112,15 @@ function PharmacyDetails() {
     }
   };
 
-  const handleReservation = () => {
-    if (!medicine || !pharmacy) {
-      return;
-    }
+const handleReservation = () => {
+  if (!medicine || !pharmacy) {
+    return;
+  }
 
-    alert(
-      `Reservation started for ${medicine.name} at ${pharmacy.name}.`
-    );
-  };
+  navigate(
+    `/reservation/${medicine.id}/${pharmacy.id}`
+  );
+};
 
   if (loading) {
     return (
