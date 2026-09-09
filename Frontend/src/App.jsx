@@ -12,6 +12,8 @@ import MedicineSearch from "./pages/medicine/search/MedicineSearch";
 import MedicineDetails from "./pages/medicine/details/MedicineDetails";
 import PharmacyDetails from "./pages/pharmacy/PharmacyDetails";
 
+import PharmacyNotifications from "./pages/PharmacyNotifications";
+
 import Login from "./pages/authentication/Login/Login";
 import Register from "./pages/authentication/Register/Register";
 
@@ -23,8 +25,6 @@ import CustomerNotifications from "./pages/notifications/CustomerNotifications";
 // Task 11 - Pharmacy Profile & Inventory
 import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
 import InventoryManagement from "./pages/pharmacy/InventoryManagement";
-
-// Temporary pages for testing other tasks
 
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
@@ -46,7 +46,6 @@ function App() {
   return (
     <Router>
       <Routes>
-
         {/* Medicine Reservation */}
 
         <Route
@@ -121,6 +120,11 @@ function App() {
             element={<PharmacyDashboard />}
           />
 
+          <Route
+            path="/pharmacy/notifications"
+            element={<PharmacyNotifications />}
+          />
+
           {/* Task 11 - Pharmacy Profile */}
 
           <Route
@@ -151,15 +155,15 @@ function App() {
 
         {/* Default Route */}
 
-       <Route
-  path="/"
-  element={
-    <Navigate
-      to="/login"
-      replace
-    />
-  }
-/>
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to="/login"
+              replace
+            />
+          }
+        />
 
         {/* Fallback */}
 
@@ -172,7 +176,6 @@ function App() {
             />
           }
         />
-
       </Routes>
     </Router>
   );
