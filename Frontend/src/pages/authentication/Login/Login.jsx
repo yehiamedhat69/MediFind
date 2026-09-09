@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+
+import {
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+
 import "./Login.css";
 
 function Login() {
@@ -25,6 +31,7 @@ function Login() {
     setErrors((prev) => ({
       ...prev,
       [name]: "",
+      general: "",
     }));
   };
 
@@ -40,7 +47,8 @@ function Login() {
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password =
+        "Password must be at least 6 characters";
     }
 
     return newErrors;
@@ -56,14 +64,98 @@ function Login() {
       return;
     }
 
-    // API integration will be added later.
-    console.log("Login data:", formData);
+    /*
+      Temporary mock users for frontend testing.
+      Replace this with the real backend API later.
+    */
 
-    // Temporary navigation for UI testing.
-    const destination =
-      location.state?.from?.pathname || "/medicine-search";
+    const testUsers = [
+      {
+        id: 1,
+        name: "Test Customer",
+        email: "customer@test.com",
+        password: "123456",
+        role: "customer",
+      },
+      {
+        id: 2,
+        name: "Test Pharmacy",
+        email: "pharmacy@test.com",
+        password: "123456",
+        role: "pharmacy",
+      },
+    ];
 
-    navigate(destination);
+    const user = testUsers.find(
+      (item) =>
+        item.email === formData.email.trim() &&
+        item.password === formData.password
+    );
+
+    if (!user) {
+      setErrors({
+        general: "Invalid email or password.",
+      });
+
+      return;
+    }
+
+    // Store mock authentication data
+    localStorage.setItem(
+      "token",
+      `mock-token-${user.id}`
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      })
+    );
+
+    /*
+      If the user tried to access a protected page
+      before logging in, return them to that page.
+    */
+
+    const requestedPath =
+      location.state?.from?.pathname;
+
+    const requestedSearch =
+      location.state?.from?.search || "";
+
+    if (requestedPath) {
+      navigate(
+        requestedPath + requestedSearch,
+        { replace: true }
+      );
+
+      return;
+    }
+
+    // Default destination according to role
+    if (user.role === "customer") {
+      navigate("/customer/dashboard", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    if (user.role === "pharmacy") {
+      navigate("/pharmacy/dashboard", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    navigate("/medicine-search", {
+      replace: true,
+    });
   };
 
   return (
@@ -87,15 +179,31 @@ function Login() {
         </div>
 
         <div className="auth-card">
+
           <div className="auth-header">
             <h2>Welcome Back</h2>
-            <p>Sign in to continue to MediFind</p>
+
+            <p>
+              Sign in to continue to MediFind
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
+          <form
+            onSubmit={handleSubmit}
+            className="auth-form"
+          >
+
+            {errors.general && (
+              <div className="error-message">
+                {errors.general}
+              </div>
+            )}
 
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+
+              <label htmlFor="email">
+                Email Address
+              </label>
 
               <input
                 id="email"
@@ -104,7 +212,11 @@ function Login() {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? "input-error" : ""}
+                className={
+                  errors.email
+                    ? "input-error"
+                    : ""
+                }
               />
 
               {errors.email && (
@@ -112,40 +224,66 @@ function Login() {
                   {errors.email}
                 </span>
               )}
+
             </div>
 
             <div className="form-group">
+
               <div className="password-label-row">
-                <label htmlFor="password">Password</label>
+
+                <label htmlFor="password">
+                  Password
+                </label>
 
                 <button
                   type="button"
                   className="forgot-password"
-                  onClick={() => alert("Forgot password will be added later.")}
+                  onClick={() =>
+                    alert(
+                      "Forgot password will be added later."
+                    )
+                  }
                 >
                   Forgot Password?
                 </button>
+
               </div>
 
               <div className="password-input-wrapper">
+
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="password"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={errors.password ? "input-error" : ""}
+                  className={
+                    errors.password
+                      ? "input-error"
+                      : ""
+                  }
                 />
 
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(
+                      !showPassword
+                    )
+                  }
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword
+                    ? "Hide"
+                    : "Show"}
                 </button>
+
               </div>
 
               {errors.password && (
@@ -153,11 +291,16 @@ function Login() {
                   {errors.password}
                 </span>
               )}
+
             </div>
 
-            <button type="submit" className="auth-submit">
+            <button
+              type="submit"
+              className="auth-submit"
+            >
               Sign In
             </button>
+
           </form>
 
           <div className="auth-divider">
@@ -166,10 +309,13 @@ function Login() {
 
           <p className="auth-switch">
             Don't have an account?{" "}
-            <Link to="/register">Create an account</Link>
-          </p>
-        </div>
 
+            <Link to="/register">
+              Create an account
+            </Link>
+          </p>
+
+        </div>
       </div>
     </div>
   );

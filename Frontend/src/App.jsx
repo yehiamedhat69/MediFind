@@ -17,6 +17,9 @@ import Register from "./pages/authentication/Register/Register";
 
 import MedicineReservation from "./pages/reservation/MedicineReservation";
 
+import CustomerReservations from "./pages/reservation/CustomerReservations";
+import CustomerNotifications from "./pages/notifications/CustomerNotifications";
+
 // Task 11 - Pharmacy Profile & Inventory
 import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
 import InventoryManagement from "./pages/pharmacy/InventoryManagement";
@@ -44,10 +47,13 @@ function App() {
     <Router>
       <Routes>
 
+        {/* Medicine Reservation */}
+
         <Route
           path="/reservation/:medicineId/:pharmacyId"
           element={<MedicineReservation />}
         />
+
         {/* Public Routes */}
 
         <Route
@@ -91,6 +97,16 @@ function App() {
             path="/customer/dashboard"
             element={<CustomerDashboard />}
           />
+
+          <Route
+            path="/customer/reservations"
+            element={<CustomerReservations />}
+          />
+
+          <Route
+            path="/customer/notifications"
+            element={<CustomerNotifications />}
+          />
         </Route>
 
         {/* Pharmacy Routes */}
@@ -106,12 +122,14 @@ function App() {
           />
 
           {/* Task 11 - Pharmacy Profile */}
+
           <Route
             path="/pharmacy/profile"
             element={<PharmacyProfile />}
           />
 
           {/* Task 11 - Inventory Management */}
+
           <Route
             path="/pharmacy/inventory"
             element={<InventoryManagement />}
@@ -133,15 +151,15 @@ function App() {
 
         {/* Default Route */}
 
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to="/medicine-search"
-              replace
-            />
-          }
-        />
+       <Route
+  path="/"
+  element={
+    <Navigate
+      to="/login"
+      replace
+    />
+  }
+/>
 
         {/* Fallback */}
 

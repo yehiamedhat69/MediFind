@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import "./Register.css";
 
 function Register() {
@@ -14,8 +19,12 @@ function Register() {
   });
 
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,27 +44,46 @@ function Register() {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Full name is required";
-    } else if (formData.name.trim().length < 3) {
-      newErrors.name = "Name must be at least 3 characters";
+      newErrors.name =
+        "Full name is required";
+    } else if (
+      formData.name.trim().length < 3
+    ) {
+      newErrors.name =
+        "Name must be at least 3 characters";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
+      newErrors.email =
+        "Email is required";
+    } else if (
+      !/\S+@\S+\.\S+/.test(
+        formData.email
+      )
+    ) {
+      newErrors.email =
+        "Please enter a valid email";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password =
+        "Password is required";
+    } else if (
+      formData.password.length < 6
+    ) {
+      newErrors.password =
+        "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword =
+        "Please confirm your password";
+    } else if (
+      formData.password !==
+      formData.confirmPassword
+    ) {
+      newErrors.confirmPassword =
+        "Passwords do not match";
     }
 
     return newErrors;
@@ -66,22 +94,76 @@ function Register() {
 
     const validationErrors = validate();
 
-    if (Object.keys(validationErrors).length > 0) {
+    if (
+      Object.keys(validationErrors).length > 0
+    ) {
       setErrors(validationErrors);
       return;
     }
 
-    // API integration will be added later.
-    console.log("Register data:", formData);
+    /*
+      Temporary registration storage.
+      Replace this with the real backend API later.
+    */
+
+    const registeredUsers =
+      JSON.parse(
+        localStorage.getItem(
+          "registeredUsers"
+        )
+      ) || [];
+
+    const existingUser =
+      registeredUsers.find(
+        (user) =>
+          user.email.toLowerCase() ===
+          formData.email
+            .trim()
+            .toLowerCase()
+      );
+
+    if (existingUser) {
+      setErrors({
+        email:
+          "An account with this email already exists.",
+      });
+
+      return;
+    }
+
+    const newUser = {
+      id: Date.now(),
+      name: formData.name.trim(),
+      email: formData.email
+        .trim()
+        .toLowerCase(),
+      password: formData.password,
+      role: formData.role,
+    };
+
+    registeredUsers.push(newUser);
+
+    localStorage.setItem(
+      "registeredUsers",
+      JSON.stringify(
+        registeredUsers
+      )
+    );
+
+    alert(
+      "Account created successfully. Please sign in."
+    );
 
     navigate("/login");
   };
 
   return (
     <div className="register-page">
+
       <div className="register-container">
 
         <div className="register-brand">
+
           <div className="register-logo">
             <span>+</span>
           </div>
@@ -95,19 +177,31 @@ function Register() {
             <br />
             finding medicine easier.
           </p>
+
         </div>
 
         <div className="register-card">
 
           <div className="register-header">
+
             <h2>Create Account</h2>
-            <p>Join MediFind today</p>
+
+            <p>
+              Join MediFind today
+            </p>
+
           </div>
 
-          <form onSubmit={handleSubmit} className="register-form">
+          <form
+            onSubmit={handleSubmit}
+            className="register-form"
+          >
 
             <div className="form-group">
-              <label htmlFor="name">Full Name</label>
+
+              <label htmlFor="name">
+                Full Name
+              </label>
 
               <input
                 id="name"
@@ -116,7 +210,11 @@ function Register() {
                 placeholder="Enter your full name"
                 value={formData.name}
                 onChange={handleChange}
-                className={errors.name ? "input-error" : ""}
+                className={
+                  errors.name
+                    ? "input-error"
+                    : ""
+                }
               />
 
               {errors.name && (
@@ -124,10 +222,14 @@ function Register() {
                   {errors.name}
                 </span>
               )}
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="register-email">Email Address</label>
+
+              <label htmlFor="register-email">
+                Email Address
+              </label>
 
               <input
                 id="register-email"
@@ -136,7 +238,11 @@ function Register() {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? "input-error" : ""}
+                className={
+                  errors.email
+                    ? "input-error"
+                    : ""
+                }
               />
 
               {errors.email && (
@@ -144,29 +250,49 @@ function Register() {
                   {errors.email}
                 </span>
               )}
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="register-password">Password</label>
+
+              <label htmlFor="register-password">
+                Password
+              </label>
 
               <div className="password-input-wrapper">
+
                 <input
                   id="register-password"
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="password"
                   placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={errors.password ? "input-error" : ""}
+                  className={
+                    errors.password
+                      ? "input-error"
+                      : ""
+                  }
                 />
 
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(
+                      !showPassword
+                    )
+                  }
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword
+                    ? "Hide"
+                    : "Show"}
                 </button>
+
               </div>
 
               {errors.password && (
@@ -174,33 +300,51 @@ function Register() {
                   {errors.password}
                 </span>
               )}
+
             </div>
 
             <div className="form-group">
+
               <label htmlFor="confirm-password">
                 Confirm Password
               </label>
 
               <div className="password-input-wrapper">
+
                 <input
                   id="confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={
+                    showConfirmPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="confirmPassword"
                   placeholder="Confirm your password"
-                  value={formData.confirmPassword}
+                  value={
+                    formData.confirmPassword
+                  }
                   onChange={handleChange}
-                  className={errors.confirmPassword ? "input-error" : ""}
+                  className={
+                    errors.confirmPassword
+                      ? "input-error"
+                      : ""
+                  }
                 />
 
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
+                    setShowConfirmPassword(
+                      !showConfirmPassword
+                    )
                   }
                 >
-                  {showConfirmPassword ? "Hide" : "Show"}
+                  {showConfirmPassword
+                    ? "Hide"
+                    : "Show"}
                 </button>
+
               </div>
 
               {errors.confirmPassword && (
@@ -208,10 +352,14 @@ function Register() {
                   {errors.confirmPassword}
                 </span>
               )}
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="role">Account Type</label>
+
+              <label htmlFor="role">
+                Account Type
+              </label>
 
               <select
                 id="role"
@@ -219,12 +367,21 @@ function Register() {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="customer">Customer</option>
-                <option value="pharmacy">Pharmacy</option>
+                <option value="customer">
+                  Customer
+                </option>
+
+                <option value="pharmacy">
+                  Pharmacy
+                </option>
               </select>
+
             </div>
 
-            <button type="submit" className="register-submit">
+            <button
+              type="submit"
+              className="register-submit"
+            >
               Create Account
             </button>
 
@@ -232,11 +389,13 @@ function Register() {
 
           <p className="register-switch">
             Already have an account?{" "}
-            <Link to="/login">Sign in</Link>
+
+            <Link to="/login">
+              Sign in
+            </Link>
           </p>
 
         </div>
-
       </div>
     </div>
   );
