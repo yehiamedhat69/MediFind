@@ -22,16 +22,13 @@ import MedicineReservation from "./pages/reservation/MedicineReservation";
 import CustomerReservations from "./pages/reservation/CustomerReservations";
 import CustomerNotifications from "./pages/notifications/CustomerNotifications";
 
-// Task 11 - Pharmacy Profile & Inventory
 import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
 import InventoryManagement from "./pages/pharmacy/InventoryManagement";
 
+import CustomerDashboard from "./pages/customerdashboard/customerdashboard";
+
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
-}
-
-function CustomerDashboard() {
-  return <h2>Customer Dashboard - Task 4</h2>;
 }
 
 function PharmacyDashboard() {
@@ -46,13 +43,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Medicine Reservation */}
-
-        <Route
-          path="/reservation/:medicineId/:pharmacyId"
-          element={<MedicineReservation />}
-        />
-
         {/* Public Routes */}
 
         <Route
@@ -83,6 +73,13 @@ function App() {
         <Route
           path="/unauthorized"
           element={<UnauthorizedPage />}
+        />
+
+        {/* Medicine Reservation */}
+
+        <Route
+          path="/reservation/:medicineId/:pharmacyId"
+          element={<MedicineReservation />}
         />
 
         {/* Customer Routes */}
@@ -125,14 +122,10 @@ function App() {
             element={<PharmacyNotifications />}
           />
 
-          {/* Task 11 - Pharmacy Profile */}
-
           <Route
             path="/pharmacy/profile"
             element={<PharmacyProfile />}
           />
-
-          {/* Task 11 - Inventory Management */}
 
           <Route
             path="/pharmacy/inventory"
