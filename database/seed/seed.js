@@ -4,7 +4,8 @@ const Pharmacy = require('../models/Pharmacy');
 const Medicine = require('../models/Medicine');
 const Inventory = require('../models/Inventory');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/medifind';
+const MONGO_URI =
+  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/medifind';
 
 async function seed() {
   await mongoose.connect(MONGO_URI);
@@ -16,6 +17,7 @@ async function seed() {
     Inventory.deleteMany({})
   ]);
 
+  // Customer / User account
   const customer = await User.create({
     name: 'Test Customer',
     email: 'customer@medifind.test',
@@ -24,12 +26,22 @@ async function seed() {
     role: 'customer'
   });
 
+  // Pharmacist account
   const pharmacyUser = await User.create({
     name: 'Test Pharmacy Owner',
     email: 'pharmacy@medifind.test',
     password: 'change-me',
     phone: '01100000000',
     role: 'pharmacy'
+  });
+
+  // Admin account
+  const admin = await User.create({
+    name: 'Test Admin',
+    email: 'admin@medifind.test',
+    password: 'change-me',
+    phone: '01200000000',
+    role: 'admin'
   });
 
   const pharmacy = await Pharmacy.create({
@@ -74,7 +86,10 @@ async function seed() {
     }))
   );
 
-  console.log('Seed completed. Customer:', customer.email);
+  console.log('Seed completed.');
+  console.log('Customer:', customer.email);
+  console.log('Pharmacist:', pharmacyUser.email);
+  console.log('Admin:', admin.email);
 
   await mongoose.disconnect();
 }
