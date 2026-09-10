@@ -1,122 +1,92 @@
 const Pharmacy = require("../models/Pharmacy");
+const AppError = require("../utils/AppError");
+const asyncHandler = require("../utils/asyncHandler");
 
 // Add pharmacy
-const addPharmacy = async (req, res) => {
-  try {
-const { name, address, phone, location } = req.body;
-    const existing = await Pharmacy.findOne({ ownerId: req.user.id });
+const addPharmacy = asyncHandler(async (req, res) => {
+  const { name, address, phone, location } = req.body;
 
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "This account already owns a pharmacy"
-      });
-    }
+  if (!name || !address || !phone) {
+    throw new AppError("Name, address and phone are required", 400);
+  }
 
-   const pharmacy = await Pharmacy.create({
-  name,
-  address,
-  phone,
-  location,
-  ownerId: req.user.id
+  const existing = await Pharmacy.findOne({ ownerId: req.user.id });
+  if (existing) {
+    throw new AppError("This account already owns a pharmacy", 409);
+  }
+
+  const pharmacy = await Pharmacy.create({
+    name,
+    address,
+    phone,
+    location,
+    ownerId: req.user.id
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Pharmacy added successfully",
+    pharmacy
+  });
 });
 
-    res.status(201).json({
-      success: true,
-      message: "Pharmacy added successfully",
-      pharmacy
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: "Failed to add pharmacy",
-      error: error.message
-    });
-  }
-};
-
 // Get one pharmacy
-const getPharmacy = async (req, res) => {
-  try {
-    const pharmacy = await Pharmacy.findById(req.params.id);
+const getPharmacy = asyncHandler(async (req, res) => {
+  const pharmacy = await Pharmacy.findById(req.params.id);
 
-    if (!pharmacy) {
-      return res.status(404).json({
-        success: false,
-        message: "Pharmacy not found"
-      });
-    }
-
-    res.status(200).json({ success: true, pharmacy });
-  } catch (error) {
-    res.status(400).json({ success: false, message: "Invalid pharmacy ID" });
+  if (!pharmacy) {
+    throw new AppError("Pharmacy not found", 404);
   }
-};
+
+  res.status(200).json({ success: true, pharmacy });
+});
 
 // Get all pharmacies
-const getAllPharmacies = async (req, res) => {
-  try {
-    const pharmacies = await Pharmacy.find();
-    res.status(200).json({ success: true, data: pharmacies });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to retrieve pharmacies" });
-  }
-};
+const getAllPharmacies = asyncHandler(async (req, res) => {
+  const pharmacies = await Pharmacy.find();
+  res.status(200).json({ success: true, data: pharmacies });
+});
 
 // Update pharmacy (owner only)
-const updatePharmacy = async (req, res) => {
-  try {
-    const pharmacy = await Pharmacy.findById(req.params.id);
+const updatePharmacy = asyncHandler(async (req, res) => {
+  const pharmacy = await Pharmacy.findById(req.params.id);
 
-    if (!pharmacy) {
-      return res.status(404).json({ success: false, message: "Pharmacy not found" });
-    }
-
-    if (pharmacy.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not allowed to update this pharmacy"
-      });
-    }
-
-    const updated = await Pharmacy.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Pharmacy updated successfully",
-      pharmacy: updated
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: "Failed to update pharmacy", error: error.message });
+  if (!pharmacy) {
+    throw new AppError("Pharmacy not found", 404);
   }
-};
+
+  if (pharmacy.ownerId.toString() !== req.user.id) {
+    throw new AppError("You are not allowed to update this pharmacy", 403);
+  }
+
+  const updated = await Pharmacy.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Pharmacy updated successfully",
+    pharmacy: updated
+  });
+});
 
 // Delete pharmacy (owner only)
-const deletePharmacy = async (req, res) => {
-  try {
-    const pharmacy = await Pharmacy.findById(req.params.id);
+const deletePharmacy = asyncHandler(async (req, res) => {
+  const pharmacy = await Pharmacy.findById(req.params.id);
 
-    if (!pharmacy) {
-      return res.status(404).json({ success: false, message: "Pharmacy not found" });
-    }
-
-    if (pharmacy.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not allowed to delete this pharmacy"
-      });
-    }
-
-    await Pharmacy.findByIdAndDelete(req.params.id);
-
-    res.status(200).json({ success: true, message: "Pharmacy deleted successfully" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: "Invalid pharmacy ID" });
+  if (!pharmacy) {
+    throw new AppError("Pharmacy not found", 404);
   }
-};
+
+  if (pharmacy.ownerId.toString() !== req.user.id) {
+    throw new AppError("You are not allowed to delete this pharmacy", 403);
+  }
+
+  await Pharmacy.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({ success: true, message: "Pharmacy deleted successfully" });
+});
 
 module.exports = {
   addPharmacy,
