@@ -13,6 +13,7 @@ const inventoryRoutes = require("./routes/inventoryRoutes");
 const medicineSearchRoutes = require("./routes/medicineSearchRoutes");
 dotenv.config({ path: path.join(__dirname, "../.env") });
 const adminRoutes = require("./routes/adminRoutes");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -46,6 +47,10 @@ app.get("/api/protected", authenticateToken, (req, res) => {
   });
 });
 app.use("/reservations", reservationRoutes);
+
+// Error handling (must stay last, after every route above)
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
