@@ -29,6 +29,8 @@ import PharmacyReservations from "./pages/reservation/PharmacyReservations";
 
 import CustomerDashboard from "./pages/customerdashboard/customerdashboard";
 
+import AdminDashboard from "./pages/admin/Admindashboard";
+
 function UnauthorizedPage() {
   return <h2>403 - Unauthorized</h2>;
 }
@@ -37,9 +39,7 @@ function PharmacyDashboard() {
   return <h2>Pharmacy Dashboard - Task 10</h2>;
 }
 
-function AdminDashboard() {
-  return <h2>Admin Dashboard - Task 14</h2>;
-}
+
 
 function App() {
   return (
