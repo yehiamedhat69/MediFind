@@ -1,9 +1,13 @@
 import { useState } from "react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
-import SearchState from "./components/SearchState";
 import Pagination from "./components/Pagination";
 import { searchMedicines } from "../../../services/medicineService";
+
+import Loading from "../../../components/Loading";
+import ErrorMessage from "../../../components/ErrorMessage";
+import EmptyState from "../../../components/EmptyState";
+
 import "./MedicineSearch.css";
 
 function MedicineSearch() {
@@ -36,7 +40,7 @@ function MedicineSearch() {
 
     try {
       const data = await searchMedicines(trimmedTerm);
-      setResults(data);
+      setResults(data || []);
     } catch (err) {
       console.error("Error searching medicines:", err);
       setResults([]);
@@ -72,20 +76,24 @@ function MedicineSearch() {
 
   const renderResults = () => {
     if (loading) {
-      return <SearchState type="loading" />;
+      return <Loading />;
     }
 
     if (error) {
       return (
-        <SearchState
-          type="error"
+        <ErrorMessage
           message={error}
+          onRetry={() => handleSearch(searchTerm)}
         />
       );
     }
 
     if (searched && results.length === 0) {
-      return <SearchState type="empty" />;
+      return (
+        <EmptyState
+          message="No medicines found. Try searching for another medicine."
+        />
+      );
     }
 
     if (results.length > 0) {

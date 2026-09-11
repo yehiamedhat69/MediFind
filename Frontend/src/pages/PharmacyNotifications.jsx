@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 
 import Loading from "../components/Loading";
@@ -111,6 +110,7 @@ function PharmacyNotifications() {
     <div className="pharmacy-notifications-page">
       <div className="pharmacy-notifications-header">
         <h1>Pharmacy Notifications</h1>
+
         <p>
           Stay updated with reservations, stock alerts,
           and pharmacy activity.
@@ -138,9 +138,7 @@ function PharmacyNotifications() {
             {!notification.isRead && (
               <button
                 className="mark-read-btn"
-                onClick={() =>
-                  markAsRead(notification.id)
-                }
+                onClick={() => markAsRead(notification.id)}
               >
                 Mark as Read
               </button>

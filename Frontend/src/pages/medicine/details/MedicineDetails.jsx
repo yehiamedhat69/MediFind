@@ -4,6 +4,11 @@ import {
   getMedicineById,
   getPharmaciesByMedicineId,
 } from "../../../services/medicineService";
+
+import Loading from "../../../components/Loading";
+import ErrorMessage from "../../../components/ErrorMessage";
+import EmptyState from "../../../components/EmptyState";
+
 import "./MedicineDetails.css";
 
 function MedicineDetails() {
@@ -20,52 +25,50 @@ function MedicineDetails() {
     availability: "all",
   });
 
-  const [appliedFilters, setAppliedFilters] =
-    useState({
-      location: "all",
-      minPrice: "",
-      maxPrice: "",
-      availability: "all",
-    });
+  const [appliedFilters, setAppliedFilters] = useState({
+    location: "all",
+    minPrice: "",
+    maxPrice: "",
+    availability: "all",
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchMedicineDetails = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const fetchMedicineDetails = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        const medicineData =
-          await getMedicineById(medicineId);
+      const medicineData = await getMedicineById(medicineId);
 
-        if (!medicineData) {
-          setMedicine(null);
-          setPharmacies([]);
-          return;
-        }
-
-        setMedicine(medicineData);
-
-        const pharmacyData =
-          await getPharmaciesByMedicineId(medicineId);
-
-        setPharmacies(pharmacyData);
-      } catch (err) {
-        console.error(
-          "Error fetching medicine details:",
-          err
-        );
-
-        setError(
-          "Something went wrong while loading medicine details."
-        );
-      } finally {
-        setLoading(false);
+      if (!medicineData) {
+        setMedicine(null);
+        setPharmacies([]);
+        return;
       }
-    };
 
+      setMedicine(medicineData);
+
+      const pharmacyData =
+        await getPharmaciesByMedicineId(medicineId);
+
+      setPharmacies(pharmacyData || []);
+    } catch (err) {
+      console.error(
+        "Error fetching medicine details:",
+        err
+      );
+
+      setError(
+        "Something went wrong while loading medicine details."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMedicineDetails();
   }, [medicineId]);
 
@@ -135,18 +138,17 @@ function MedicineDetails() {
     );
   };
 
-const handleReservation = (pharmacy) => {
-  navigate(
-    `/reservation/${medicineId}/${pharmacy.id}`
-  );
-};
+  const handleReservation = (pharmacy) => {
+    navigate(
+      `/reservation/${medicineId}/${pharmacy.id}`
+    );
+  };
 
   if (loading) {
     return (
       <div className="medicine-details-page">
         <div className="details-state">
-          <div className="loader"></div>
-          <p>Loading medicine details...</p>
+          <Loading />
         </div>
       </div>
     );
@@ -157,15 +159,11 @@ const handleReservation = (pharmacy) => {
       <div className="medicine-details-page">
         <div className="details-state error-state">
           <h2>Unable to load medicine</h2>
-          <p>{error}</p>
 
-          <button
-            onClick={() =>
-              window.location.reload()
-            }
-          >
-            Try Again
-          </button>
+          <ErrorMessage
+            message={error}
+            onRetry={fetchMedicineDetails}
+          />
         </div>
       </div>
     );
@@ -177,10 +175,9 @@ const handleReservation = (pharmacy) => {
         <div className="details-state">
           <h2>Medicine Not Found</h2>
 
-          <p>
-            The medicine you're looking for doesn't
-            exist or is no longer available.
-          </p>
+          <EmptyState
+            message="The medicine you're looking for doesn't exist or is no longer available."
+          />
 
           <button
             onClick={() =>
@@ -346,14 +343,9 @@ const handleReservation = (pharmacy) => {
           </div>
 
           {filteredPharmacies.length === 0 ? (
-            <div className="no-pharmacies">
-              <h3>No Pharmacies Match Your Filters</h3>
-
-              <p>
-                Try changing or clearing your filters
-                to see more pharmacies.
-              </p>
-            </div>
+            <EmptyState
+              message="No pharmacies match your filters. Try changing or clearing your filters."
+            />
           ) : (
             <div className="pharmacies-grid">
               {filteredPharmacies.map(
