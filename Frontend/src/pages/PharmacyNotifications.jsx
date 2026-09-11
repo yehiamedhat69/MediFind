@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+
+import Loading from "../components/Loading";
+import ErrorMessage from "../components/ErrorMessage";
+import EmptyState from "../components/EmptyState";
+
 import "./PharmacyNotifications.css";
 
 function PharmacyNotifications() {
@@ -6,43 +11,43 @@ function PharmacyNotifications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Temporary mock data
+      // Later, replace this with the backend API call
+      const data = [
+        {
+          id: 1,
+          message: "New reservation received for Panadol",
+          date: "Today, 10:30 AM",
+          isRead: false,
+        },
+        {
+          id: 2,
+          message: "Your reservation has been accepted",
+          date: "Yesterday, 5:20 PM",
+          isRead: true,
+        },
+        {
+          id: 3,
+          message: "Panadol stock is running low",
+          date: "Yesterday, 2:15 PM",
+          isRead: false,
+        },
+      ];
+
+      setNotifications(data);
+    } catch (err) {
+      setError("Failed to load notifications.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Temporary mock data
-    // Later, replace this with the backend API call
-    const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = [
-          {
-            id: 1,
-            message: "New reservation received for Panadol",
-            date: "Today, 10:30 AM",
-            isRead: false,
-          },
-          {
-            id: 2,
-            message: "Your reservation has been accepted",
-            date: "Yesterday, 5:20 PM",
-            isRead: true,
-          },
-          {
-            id: 3,
-            message: "Panadol stock is running low",
-            date: "Yesterday, 2:15 PM",
-            isRead: false,
-          },
-        ];
-
-        setNotifications(data);
-      } catch (err) {
-        setError("Failed to load notifications.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchNotifications();
   }, []);
 
@@ -64,7 +69,7 @@ function PharmacyNotifications() {
         </div>
 
         <div className="notification-state">
-          <p>Loading notifications...</p>
+          <Loading />
         </div>
       </div>
     );
@@ -78,7 +83,10 @@ function PharmacyNotifications() {
         </div>
 
         <div className="notification-state error-state">
-          <p>{error}</p>
+          <ErrorMessage
+            message={error}
+            onRetry={fetchNotifications}
+          />
         </div>
       </div>
     );
@@ -92,7 +100,7 @@ function PharmacyNotifications() {
         </div>
 
         <div className="notification-state">
-          <p>No notifications available.</p>
+          <EmptyState message="No notifications available." />
         </div>
       </div>
     );
@@ -102,7 +110,11 @@ function PharmacyNotifications() {
     <div className="pharmacy-notifications-page">
       <div className="pharmacy-notifications-header">
         <h1>Pharmacy Notifications</h1>
-        <p>Stay updated with reservations, stock alerts, and pharmacy activity.</p>
+
+        <p>
+          Stay updated with reservations, stock alerts,
+          and pharmacy activity.
+        </p>
       </div>
 
       <div className="notifications-list">

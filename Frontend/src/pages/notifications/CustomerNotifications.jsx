@@ -5,6 +5,10 @@ import {
   markNotificationAsRead,
 } from "../../services/notificationService";
 
+import Loading from "../../components/Loading";
+import ErrorMessage from "../../components/ErrorMessage";
+import EmptyState from "../../components/EmptyState";
+
 import "./CustomerNotifications.css";
 
 function CustomerNotifications() {
@@ -21,7 +25,7 @@ function CustomerNotifications() {
 
       const data = await getCustomerNotifications();
 
-      setNotifications(data);
+      setNotifications(data || []);
     } catch (err) {
       setError(
         err.message || "Failed to load notifications."
@@ -69,8 +73,7 @@ function CustomerNotifications() {
     return (
       <div className="notifications-page">
         <div className="notifications-state">
-          <div className="notifications-spinner"></div>
-          <p>Loading your notifications...</p>
+          <Loading />
         </div>
       </div>
     );
@@ -81,14 +84,11 @@ function CustomerNotifications() {
       <div className="notifications-page">
         <div className="notifications-state error-state">
           <h2>Unable to Load Notifications</h2>
-          <p>{error}</p>
 
-          <button
-            className="retry-button"
-            onClick={fetchNotifications}
-          >
-            Try Again
-          </button>
+          <ErrorMessage
+            message={error}
+            onRetry={fetchNotifications}
+          />
         </div>
       </div>
     );
@@ -101,6 +101,7 @@ function CustomerNotifications() {
         <div className="notifications-header">
           <div>
             <h1>Notifications</h1>
+
             <p>
               Stay updated about your reservations and
               account activity.
@@ -125,15 +126,9 @@ function CustomerNotifications() {
         )}
 
         {notifications.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔔</div>
-
-            <h2>No Notifications</h2>
-
-            <p>
-              You don't have any notifications right now.
-            </p>
-          </div>
+          <EmptyState
+            message="You don't have any notifications right now."
+          />
         ) : (
           <div className="notifications-list">
             {notifications.map((notification) => (
