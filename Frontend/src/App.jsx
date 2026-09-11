@@ -25,6 +25,8 @@ import CustomerNotifications from "./pages/notifications/CustomerNotifications";
 import PharmacyProfile from "./pages/pharmacy/PharmacyProfile";
 import InventoryManagement from "./pages/pharmacy/InventoryManagement";
 
+import PharmacyReservations from "./pages/reservation/PharmacyReservations";
+
 import CustomerDashboard from "./pages/customerdashboard/customerdashboard";
 
 function UnauthorizedPage() {
@@ -130,6 +132,11 @@ function App() {
           <Route
             path="/pharmacy/inventory"
             element={<InventoryManagement />}
+          />
+
+          <Route
+            path="/pharmacy/reservation"
+            element={<PharmacyReservations />}
           />
         </Route>
 
