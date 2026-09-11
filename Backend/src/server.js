@@ -1,6 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const path = require("path");
+
+const helmet = require("helmet"); 
+const cors = require("cors");     
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
@@ -12,12 +15,17 @@ const authenticateToken = require("./middleware/authMiddleware");
 const inventoryRoutes = require("./routes/inventoryRoutes"); 
 const medicineSearchRoutes = require("./routes/medicineSearchRoutes");
 dotenv.config({ path: path.join(__dirname, "../.env") });
+const adminRoutes = require("./routes/adminRoutes");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 
 const app = express();
 
 const reservationRoutes = require("./routes/reservationRoutes");
-
 const notificationRoutes = require("./routes/notificationRoutes");
+
+
+app.use(helmet()); 
+app.use(cors());   
 
 app.use(express.json());
 
@@ -29,6 +37,7 @@ app.use("/api/pharmacies", pharmacyRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/search", medicineSearchRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin", adminRoutes);
 connectDB();
 
 // Test route
@@ -44,6 +53,10 @@ app.get("/api/protected", authenticateToken, (req, res) => {
   });
 });
 app.use("/reservations", reservationRoutes);
+
+// Error handling (must stay last, after every route above)
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
