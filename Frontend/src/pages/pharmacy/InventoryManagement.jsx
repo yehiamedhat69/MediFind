@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  getMyPharmacy,
-  getPharmacyInventory,
-  getMedicines,
-  addInventoryItem,
-  updateInventoryItem,
-  removeInventoryItem,
-} from "../../services/pharmacyManagementService";
+import { usePharmacy } from "../../context/PharmacyContext.jsx";
 
 import "./InventoryManagement.css";
 
@@ -22,14 +15,17 @@ const emptyForm = {
 const InventoryManagement = () => {
   const navigate = useNavigate();
 
-  const [pharmacy, setPharmacy] = useState(null);
-  const [inventory, setInventory] = useState([]);
-  const [medicines, setMedicines] = useState([]);
+  const {
+    pharmacy,
+    inventory,
+    addMedicine,
+    updateMedicine,
+    removeMedicine,
+  } = usePharmacy();
 
   const [formData, setFormData] = useState(emptyForm);
-  const [editingItem, setEditingItem] = useState(null);
+  const [editingItemId, setEditingItemId] = useState(null);
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [removingId, setRemovingId] = useState(null);
 
@@ -37,77 +33,77 @@ const InventoryManagement = () => {
   const [success, setSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const loadInventory = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // Available medicines in the system
+  const [medicines] = useState([
+    {
+      id: 1,
+      name: "Panadol Extra",
+      description: "Pain relief and fever reducer",
+    },
+    {
+      id: 2,
+      name: "Panadol Children",
+      description: "Pain and fever relief for children",
+    },
+    {
+      id: 3,
+      name: "Panadol Advance",
+      description: "Fast acting pain relief",
+    },
+    {
+      id: 4,
+      name: "Panadol Cold & Flu",
+      description: "Relief from cold and flu symptoms",
+    },
+    {
+      id: 5,
+      name: "Brufen 400",
+      description: "Ibuprofen pain reliever",
+    },
+    {
+      id: 6,
+      name: "Brufen 600",
+      description: "Ibuprofen tablets",
+    },
+    {
+      id: 7,
+      name: "Augmentin 625",
+      description: "Antibiotic medicine",
+    },
+    {
+      id: 8,
+      name: "Vitamin C",
+      description: "Vitamin C supplement",
+    },
+  ]);
 
-      const currentPharmacy = await getMyPharmacy();
-
-      const pharmacyId = currentPharmacy?._id;
-
-      if (!pharmacyId) {
-        throw new Error(
-          "Pharmacy ID could not be found."
-        );
-      }
-
-      const [inventoryData, medicinesData] =
-        await Promise.all([
-          getPharmacyInventory(pharmacyId),
-          getMedicines(),
-        ]);
-
-      setPharmacy(currentPharmacy);
-      setInventory(inventoryData);
-      setMedicines(medicinesData);
-    } catch (err) {
-      setError(
-        err.message ||
-          "Unable to load inventory."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadInventory();
-  }, []);
-
+  // Medicines that are not already in the pharmacy inventory
   const availableMedicinesForSelect = useMemo(() => {
     const existingMedicineIds = new Set(
-      inventory.map((item) => {
-        const medicine =
-          typeof item.medicineId === "object"
-            ? item.medicineId?._id
-            : item.medicineId;
-
-        return String(medicine);
-      })
+      inventory.map((item) => String(item.medicineId))
     );
 
     return medicines.filter((medicine) => {
-      if (editingItem) {
+      // While editing, the medicine dropdown is disabled,
+      // so there is no need to filter the current medicine.
+      if (editingItemId !== null) {
         return true;
       }
 
-      return !existingMedicineIds.has(
-        String(medicine._id)
-      );
+      return !existingMedicineIds.has(String(medicine.id));
     });
-  }, [medicines, inventory, editingItem]);
+  }, [medicines, inventory, editingItemId]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((previous) => ({
+      ...previous,
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    setFieldErrors((prev) => ({
-      ...prev,
+    setFieldErrors((previous) => ({
+      ...previous,
       [name]: "",
     }));
 
@@ -118,7 +114,7 @@ const InventoryManagement = () => {
   const validate = () => {
     const errors = {};
 
-    if (!editingItem && !formData.medicineId) {
+    if (editingItemId === null && !formData.medicineId) {
       errors.medicineId = "Please select a medicine.";
     }
 
@@ -153,11 +149,11 @@ const InventoryManagement = () => {
 
   const resetForm = () => {
     setFormData(emptyForm);
-    setEditingItem(null);
+    setEditingItemId(null);
     setFieldErrors({});
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
 
     setError("");
@@ -173,27 +169,39 @@ const InventoryManagement = () => {
     try {
       setSaving(true);
 
-      if (editingItem) {
-        await updateInventoryItem(
-          editingItem._id,
-          {
-            quantity: Number(formData.quantity),
-            price: Number(formData.price),
-            availability:
-              Boolean(formData.availability),
-          }
-        );
+      // EDIT EXISTING MEDICINE
+      if (editingItemId !== null) {
+        updateMedicine(editingItemId, {
+          quantity: Number(formData.quantity),
+          price: Number(formData.price),
+          availability: Boolean(formData.availability),
+        });
 
         setSuccess(
           "Inventory item updated successfully."
         );
-      } else {
-        await addInventoryItem({
-          medicineId: formData.medicineId,
+      }
+
+      // ADD NEW MEDICINE
+      else {
+        const selectedMedicine = medicines.find(
+          (medicine) =>
+            String(medicine.id) ===
+            String(formData.medicineId)
+        );
+
+        if (!selectedMedicine) {
+          throw new Error(
+            "Selected medicine could not be found."
+          );
+        }
+
+        addMedicine({
+          medicineId: selectedMedicine.id,
+          medicineName: selectedMedicine.name,
           quantity: Number(formData.quantity),
           price: Number(formData.price),
-          availability:
-            Boolean(formData.availability),
+          availability: Boolean(formData.availability),
         });
 
         setSuccess(
@@ -202,8 +210,6 @@ const InventoryManagement = () => {
       }
 
       resetForm();
-
-      await loadInventory();
     } catch (err) {
       setError(
         err.message ||
@@ -215,19 +221,14 @@ const InventoryManagement = () => {
   };
 
   const handleEdit = (item) => {
-    const medicineId =
-      typeof item.medicineId === "object"
-        ? item.medicineId?._id
-        : item.medicineId;
-
-    setEditingItem(item);
+    // Store only the ID of the item being edited
+    setEditingItemId(item.id);
 
     setFormData({
-      medicineId: medicineId || "",
+      medicineId: String(item.medicineId),
       quantity: String(item.quantity ?? ""),
       price: String(item.price ?? ""),
-      availability:
-        item.availability !== false,
+      availability: item.availability !== false,
     });
 
     setFieldErrors({});
@@ -240,14 +241,9 @@ const InventoryManagement = () => {
     });
   };
 
-  const handleDelete = async (item) => {
-    const medicineName =
-      typeof item.medicineId === "object"
-        ? item.medicineId?.name
-        : "this medicine";
-
+  const handleDelete = (item) => {
     const confirmed = window.confirm(
-      `Remove ${medicineName} from inventory?`
+      `Remove ${item.medicineName} from inventory?`
     );
 
     if (!confirmed) {
@@ -255,21 +251,21 @@ const InventoryManagement = () => {
     }
 
     try {
-      setRemovingId(item._id);
+      setRemovingId(item.id);
       setError("");
       setSuccess("");
 
-      await removeInventoryItem(item._id);
+      removeMedicine(item.id);
 
-      if (editingItem?._id === item._id) {
+      // If we were editing the deleted medicine,
+      // reset the form.
+      if (editingItemId === item.id) {
         resetForm();
       }
 
       setSuccess(
         "Medicine removed from inventory successfully."
       );
-
-      await loadInventory();
     } catch (err) {
       setError(
         err.message ||
@@ -280,37 +276,11 @@ const InventoryManagement = () => {
     }
   };
 
-  const getMedicineName = (item) => {
-    if (
-      item?.medicineId &&
-      typeof item.medicineId === "object"
-    ) {
-      return item.medicineId.name || "Unknown medicine";
-    }
-
-    const medicine = medicines.find(
-      (medicineItem) =>
-        String(medicineItem._id) ===
-        String(item?.medicineId)
-    );
-
-    return medicine?.name || "Unknown medicine";
-  };
-
-  if (loading) {
-    return (
-      <div className="inventory-page">
-        <div className="inventory-state">
-          <div className="inventory-loader"></div>
-          <p>Loading inventory...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="inventory-page">
       <div className="inventory-container">
+
+        {/* Header */}
         <div className="inventory-header">
           <div>
             <p className="inventory-eyebrow">
@@ -320,8 +290,8 @@ const InventoryManagement = () => {
             <h1>Inventory Management</h1>
 
             <p>
-              Manage medicines, quantities, prices and
-              availability.
+              Manage medicines, quantities, prices
+              and availability.
             </p>
           </div>
 
@@ -336,42 +306,48 @@ const InventoryManagement = () => {
           </button>
         </div>
 
+        {/* Pharmacy Summary */}
         {pharmacy && (
           <div className="pharmacy-summary">
             <strong>{pharmacy.name}</strong>
+
             <span>{pharmacy.address}</span>
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <div className="inventory-alert error">
             {error}
           </div>
         )}
 
+        {/* Success */}
         {success && (
           <div className="inventory-alert success">
             {success}
           </div>
         )}
 
+        {/* Add / Edit Form */}
         <section className="inventory-form-card">
+
           <div className="inventory-card-header">
             <div>
               <h2>
-                {editingItem
+                {editingItemId !== null
                   ? "Edit Inventory Item"
                   : "Add Medicine"}
               </h2>
 
               <p>
-                {editingItem
+                {editingItemId !== null
                   ? "Update the selected medicine."
                   : "Add a medicine to your pharmacy inventory."}
               </p>
             </div>
 
-            {editingItem && (
+            {editingItemId !== null && (
               <button
                 type="button"
                 className="cancel-edit-button"
@@ -387,6 +363,8 @@ const InventoryManagement = () => {
             className="inventory-form"
           >
             <div className="inventory-form-grid">
+
+              {/* Medicine */}
               <div className="form-group">
                 <label htmlFor="medicineId">
                   Medicine
@@ -397,7 +375,7 @@ const InventoryManagement = () => {
                   name="medicineId"
                   value={formData.medicineId}
                   onChange={handleChange}
-                  disabled={Boolean(editingItem)}
+                  disabled={editingItemId !== null}
                   className={
                     fieldErrors.medicineId
                       ? "input-error"
@@ -411,8 +389,8 @@ const InventoryManagement = () => {
                   {availableMedicinesForSelect.map(
                     (medicine) => (
                       <option
-                        key={medicine._id}
-                        value={medicine._id}
+                        key={medicine.id}
+                        value={medicine.id}
                       >
                         {medicine.name}
                       </option>
@@ -427,6 +405,7 @@ const InventoryManagement = () => {
                 )}
               </div>
 
+              {/* Quantity */}
               <div className="form-group">
                 <label htmlFor="quantity">
                   Quantity
@@ -455,6 +434,7 @@ const InventoryManagement = () => {
                 )}
               </div>
 
+              {/* Price */}
               <div className="form-group">
                 <label htmlFor="price">
                   Price
@@ -483,6 +463,7 @@ const InventoryManagement = () => {
                 )}
               </div>
 
+              {/* Availability */}
               <div className="availability-group">
                 <label className="availability-label">
                   Availability
@@ -507,8 +488,10 @@ const InventoryManagement = () => {
               </div>
             </div>
 
+            {/* Actions */}
             <div className="form-actions">
-              {editingItem && (
+
+              {editingItemId !== null && (
                 <button
                   type="button"
                   className="secondary-button"
@@ -526,30 +509,38 @@ const InventoryManagement = () => {
               >
                 {saving
                   ? "Saving..."
-                  : editingItem
+                  : editingItemId !== null
                   ? "Update Medicine"
                   : "Add Medicine"}
               </button>
+
             </div>
           </form>
         </section>
 
+        {/* Inventory List */}
         <section className="inventory-list-card">
+
           <div className="inventory-card-header">
             <div>
               <h2>Current Inventory</h2>
 
               <p>
                 {inventory.length} medicine
-                {inventory.length !== 1 ? "s" : ""} in
-                inventory
+                {inventory.length !== 1
+                  ? "s"
+                  : ""}{" "}
+                in inventory
               </p>
             </div>
           </div>
 
           {inventory.length === 0 ? (
             <div className="inventory-empty">
-              <div className="empty-icon">+</div>
+
+              <div className="empty-icon">
+                +
+              </div>
 
               <h3>No medicines yet</h3>
 
@@ -557,11 +548,15 @@ const InventoryManagement = () => {
                 Add your first medicine to start
                 managing your inventory.
               </p>
+
             </div>
           ) : (
             <>
+              {/* Desktop Table */}
               <div className="inventory-table-wrapper">
+
                 <table className="inventory-table">
+
                   <thead>
                     <tr>
                       <th>Medicine</th>
@@ -573,145 +568,180 @@ const InventoryManagement = () => {
                   </thead>
 
                   <tbody>
-                    {inventory.map((item) => (
-                      <tr key={item._id}>
-                        <td>
-                          <strong>
-                            {getMedicineName(item)}
-                          </strong>
-                        </td>
+                    {inventory.map((item) => {
 
-                        <td>
-                          {item.quantity}
-                        </td>
+                     const isAvailable = item.availability;
 
-                        <td>
-                          {Number(item.price).toFixed(2)}
-                        </td>
+                      return (
+                        <tr key={item.id}>
 
-                        <td>
-                          <span
-                            className={`status-badge ${
-                              item.availability &&
-                              Number(item.quantity) > 0
-                                ? "available"
-                                : "unavailable"
-                            }`}
-                          >
-                            {item.availability &&
-                            Number(item.quantity) > 0
-                              ? "Available"
-                              : "Unavailable"}
-                          </span>
-                        </td>
+                          <td>
+                            <strong>
+                              {item.medicineName}
+                            </strong>
+                          </td>
 
-                        <td>
-                          <div className="action-buttons">
-                            <button
-                              type="button"
-                              className="edit-button"
-                              onClick={() =>
-                                handleEdit(item)
-                              }
+                          <td>
+                            {item.quantity}
+                          </td>
+
+                          <td>
+                            {Number(
+                              item.price
+                            ).toFixed(2)}
+                          </td>
+
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                isAvailable
+                                  ? "available"
+                                  : "unavailable"
+                              }`}
                             >
-                              Edit
-                            </button>
+                              {isAvailable
+                                ? "Available"
+                                : "Unavailable"}
+                            </span>
+                          </td>
 
-                            <button
-                              type="button"
-                              className="delete-button"
-                              onClick={() =>
-                                handleDelete(item)
-                              }
-                              disabled={
-                                removingId === item._id
-                              }
-                            >
-                              {removingId === item._id
-                                ? "Removing..."
-                                : "Remove"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          <td>
+                            <div className="action-buttons">
+
+                              <button
+                                type="button"
+                                className="edit-button"
+                                onClick={() =>
+                                  handleEdit(item)
+                                }
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                type="button"
+                                className="delete-button"
+                                onClick={() =>
+                                  handleDelete(item)
+                                }
+                                disabled={
+                                  removingId ===
+                                  item.id
+                                }
+                              >
+                                {removingId ===
+                                item.id
+                                  ? "Removing..."
+                                  : "Remove"}
+                              </button>
+
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
                   </tbody>
+
                 </table>
               </div>
 
+              {/* Mobile List */}
               <div className="inventory-mobile-list">
-                {inventory.map((item) => (
-                  <div
-                    className="inventory-mobile-card"
-                    key={item._id}
-                  >
-                    <div className="mobile-card-header">
-                      <strong>
-                        {getMedicineName(item)}
-                      </strong>
 
-                      <span
-                        className={`status-badge ${
-                          item.availability &&
-                          Number(item.quantity) > 0
-                            ? "available"
-                            : "unavailable"
-                        }`}
-                      >
-                        {item.availability &&
-                        Number(item.quantity) > 0
-                          ? "Available"
-                          : "Unavailable"}
-                      </span>
-                    </div>
+                {inventory.map((item) => {
 
-                    <div className="mobile-info-grid">
-                      <div>
-                        <span>Quantity</span>
+                  const isAvailable =
+                    item.availability &&
+                    Number(item.quantity) > 0;
+
+                  return (
+                    <div
+                      className="inventory-mobile-card"
+                      key={item.id}
+                    >
+
+                      <div className="mobile-card-header">
+
                         <strong>
-                          {item.quantity}
+                          {item.medicineName}
                         </strong>
+
+                        <span
+                          className={`status-badge ${
+                            isAvailable
+                              ? "available"
+                              : "unavailable"
+                          }`}
+                        >
+                          {isAvailable
+                            ? "Available"
+                            : "Unavailable"}
+                        </span>
+
                       </div>
 
-                      <div>
-                        <span>Price</span>
-                        <strong>
-                          {Number(item.price).toFixed(2)}
-                        </strong>
+                      <div className="mobile-info-grid">
+
+                        <div>
+                          <span>Quantity</span>
+
+                          <strong>
+                            {item.quantity}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Price</span>
+
+                          <strong>
+                            {Number(
+                              item.price
+                            ).toFixed(2)}
+                          </strong>
+                        </div>
+
                       </div>
-                    </div>
 
-                    <div className="mobile-actions">
-                      <button
-                        type="button"
-                        className="edit-button"
-                        onClick={() =>
-                          handleEdit(item)
-                        }
-                      >
-                        Edit
-                      </button>
+                      <div className="mobile-actions">
 
-                      <button
-                        type="button"
-                        className="delete-button"
-                        onClick={() =>
-                          handleDelete(item)
-                        }
-                        disabled={
-                          removingId === item._id
-                        }
-                      >
-                        {removingId === item._id
-                          ? "Removing..."
-                          : "Remove"}
-                      </button>
+                        <button
+                          type="button"
+                          className="edit-button"
+                          onClick={() =>
+                            handleEdit(item)
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() =>
+                            handleDelete(item)
+                          }
+                          disabled={
+                            removingId ===
+                            item.id
+                          }
+                        >
+                          {removingId ===
+                          item.id
+                            ? "Removing..."
+                            : "Remove"}
+                        </button>
+
+                      </div>
+
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+
               </div>
             </>
           )}
+
         </section>
       </div>
     </div>

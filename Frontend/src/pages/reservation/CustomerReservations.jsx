@@ -1,9 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 
 import Loading from "../../components/Loading";
 import ErrorMessage from "../../components/ErrorMessage";
 import EmptyState from "../../components/EmptyState";
+
+import "./CustomerReservations.css";
 
 function CustomerReservations() {
   const [reservations, setReservations] = useState([]);
@@ -20,17 +21,24 @@ function CustomerReservations() {
       const data = [
         {
           id: 1,
-          medicineName: "Panadol",
+          medicineName: "Panadol 500mg",
           pharmacyName: "MediFind Pharmacy",
           status: "Confirmed",
           date: "Today, 10:30 AM",
         },
         {
           id: 2,
-          medicineName: "Augmentin",
+          medicineName: "Augmentin 625mg",
           pharmacyName: "Care Pharmacy",
           status: "Pending",
           date: "Tomorrow, 2:00 PM",
+        },
+        {
+          id: 3,
+          medicineName: "Brufen 400mg",
+          pharmacyName: "El Nour Pharmacy",
+          status: "Completed",
+          date: "Sep 4, 2026",
         },
       ];
 
@@ -46,79 +54,138 @@ function CustomerReservations() {
     fetchReservations();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>My Reservations</h1>
-        <Loading />
-      </div>
+  const handleCancel = (reservationId) => {
+    setReservations((currentReservations) =>
+      currentReservations.map((reservation) =>
+        reservation.id === reservationId
+          ? { ...reservation, status: "Cancelled" }
+          : reservation
+      )
     );
-  }
+  };
 
-  if (error) {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>My Reservations</h1>
+  const getStatusClass = (status) => {
+    const normalizedStatus = status.toLowerCase();
 
-        <ErrorMessage
-          message={error}
-          onRetry={fetchReservations}
-        />
-      </div>
-    );
-  }
+    if (normalizedStatus === "confirmed") {
+      return "accepted";
+    }
 
-  if (reservations.length === 0) {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>My Reservations</h1>
+    if (normalizedStatus === "completed") {
+      return "completed";
+    }
 
-        <EmptyState
-          message="You don't have any reservations yet."
-        />
-      </div>
-    );
-  }
+    return normalizedStatus;
+  };
+
+  const canCancel = (status) => {
+    return status === "Pending" || status === "Confirmed";
+  };
 
   return (
-    <div
-      style={{
-        maxWidth: "800px",
-        margin: "0 auto",
-        padding: "20px",
-      }}
-    >
-      <h1>My Reservations</h1>
+    <main className="reservations-page">
+      <div className="reservations-container">
+        <header className="reservations-header">
+          <div>
+            <h1>My Reservations</h1>
+            <p>
+              View and manage your medicine reservations.
+            </p>
+          </div>
 
-      {reservations.map((reservation) => (
-        <div
-          key={reservation.id}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: "8px",
-            padding: "15px",
-            marginBottom: "15px",
-          }}
-        >
-          <h2>{reservation.medicineName}</h2>
+          {!loading && !error && reservations.length > 0 && (
+            <span className="reservation-count">
+              {reservations.length} Reservations
+            </span>
+          )}
+        </header>
 
-          <p>
-            <strong>Pharmacy:</strong>{" "}
-            {reservation.pharmacyName}
-          </p>
+        {loading && (
+          <div className="reservations-state">
+            <Loading />
+            <p>Loading your reservations...</p>
+          </div>
+        )}
 
-          <p>
-            <strong>Status:</strong>{" "}
-            {reservation.status}
-          </p>
+        {!loading && error && (
+          <div className="reservations-state error-state">
+            <ErrorMessage
+              message={error}
+              onRetry={fetchReservations}
+            />
+          </div>
+        )}
 
-          <p>
-            <strong>Date:</strong>{" "}
-            {reservation.date}
-          </p>
-        </div>
-      ))}
-    </div>
+        {!loading && !error && reservations.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-icon">📋</div>
+
+            <h2>No Reservations Yet</h2>
+
+            <p>
+              You don't have any medicine reservations yet.
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && reservations.length > 0 && (
+          <div className="reservations-list">
+            {reservations.map((reservation) => (
+              <article
+                key={reservation.id}
+                className="reservation-card"
+              >
+                <div className="reservation-card-header">
+                  <div>
+                    <h2>{reservation.medicineName}</h2>
+
+                    <span className="reservation-id">
+                      Reservation #{reservation.id}
+                    </span>
+                  </div>
+
+                  <span
+                    className={`status-badge ${getStatusClass(
+                      reservation.status
+                    )}`}
+                  >
+                    {reservation.status}
+                  </span>
+                </div>
+
+                <div className="reservation-info">
+                  <div className="info-item">
+                    <span>Pharmacy</span>
+                    <strong>
+                      {reservation.pharmacyName}
+                    </strong>
+                  </div>
+
+                  <div className="info-item">
+                    <span>Date</span>
+                    <strong>{reservation.date}</strong>
+                  </div>
+                </div>
+
+                {canCancel(reservation.status) && (
+                  <div className="reservation-actions">
+                    <button
+                      type="button"
+                      className="cancel-reservation-button"
+                      onClick={() =>
+                        handleCancel(reservation.id)
+                      }
+                    >
+                      Cancel Reservation
+                    </button>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
 

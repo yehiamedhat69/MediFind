@@ -4,7 +4,7 @@ const navItems = [
   {
     id: "dashboard",
     label: "Dashboard",
-    path: "/customer/dashboard",
+    path: "/pharmacy/dashboard",
     icon: (
       <svg className="nav-icon" viewBox="0 0 24 24" fill="none">
         <rect
@@ -48,20 +48,31 @@ const navItems = [
   },
 
   {
-    id: "search",
-    label: "Find Medicine",
-    path: "/medicine-search",
+    id: "inventory",
+    label: "Inventory",
+    path: "/pharmacy/inventory",
     icon: (
       <svg className="nav-icon" viewBox="0 0 24 24" fill="none">
-        <circle
-          cx="11"
-          cy="11"
-          r="7"
+        <path
+          d="M4 7H20"
           stroke="currentColor"
           strokeWidth="1.8"
+          strokeLinecap="round"
         />
         <path
-          d="M16 16L21 21"
+          d="M6 7V19H18V7"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 7V4H15V7"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 11H15"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
@@ -72,15 +83,30 @@ const navItems = [
 
   {
     id: "reservations",
-    label: "My Reservations",
-    path: "/customer/reservations",
+    label: "Reservations",
+    path: "/pharmacy/reservation",
     icon: (
       <svg className="nav-icon" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M6 3H18C19.1 3 20 3.9 20 5V21L12 17L4 21V5C4 3.9 4.9 3 6 3Z"
+        <rect
+          x="4"
+          y="5"
+          width="16"
+          height="16"
+          rx="2"
           stroke="currentColor"
           strokeWidth="1.8"
-          strokeLinejoin="round"
+        />
+        <path
+          d="M8 3V7M16 3V7M4 10H20"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M8 14H16M8 17H13"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
         />
       </svg>
     ),
@@ -89,7 +115,7 @@ const navItems = [
   {
     id: "notifications",
     label: "Notifications",
-    path: "/customer/notifications",
+    path: "/pharmacy/notifications",
     icon: (
       <svg className="nav-icon" viewBox="0 0 24 24" fill="none">
         <path
@@ -107,9 +133,32 @@ const navItems = [
       </svg>
     ),
   },
+
+  {
+    id: "profile",
+    label: "Pharmacy Profile",
+    path: "/pharmacy/profile",
+    icon: (
+      <svg className="nav-icon" viewBox="0 0 24 24" fill="none">
+        <circle
+          cx="12"
+          cy="8"
+          r="4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+        <path
+          d="M4 21C4 16.6 7.6 14 12 14C16.4 14 20 16.6 20 21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
-export default function Sidebar() {
+export default function PharmacySidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 

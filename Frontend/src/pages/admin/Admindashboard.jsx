@@ -1,1176 +1,1650 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  Pill,
-  Store,
-  CalendarCheck,
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  LogOut,
-} from "lucide-react";
-import "./AdminDashboard.css";
+import { useMemo, useState } from "react";
+import { useMedicine } from "../../context/MedicineContext.jsx";
+import "./Admindashboard.css";
 
 function AdminDashboard() {
-    const navigate = useNavigate();
-  const [activeView, setActiveView] = useState("overview");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pharmacySearch, setPharmacySearch] = useState("");
-  const [medicineSearch, setMedicineSearch] = useState("");
-  const [reservationSearch, setReservationSearch] = useState("");
-  const [showAddMedicine, setShowAddMedicine] = useState(false);
-  const [editingMedicine, setEditingMedicine] = useState(null);
+  // ==========================================
+  // Medicine Context
+  // ==========================================
 
-const [newMedicine, setNewMedicine] = useState({
-  name: "",
-  category: "",
-  price: "",
-  stock: "",
-});
-  const [showAddPharmacy, setShowAddPharmacy] = useState(false);
-  const [editingPharmacy, setEditingPharmacy] = useState(null);
+  const {
+    medicines,
+    addMedicine,
+    updateMedicine,
+    removeMedicine,
+  } = useMedicine();
 
-const [newPharmacy, setNewPharmacy] = useState({
-  name: "",
-  location: "",
-});
-  const [showAddUser, setShowAddUser] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [newUser, setNewUser] = useState({
-  name: "",
-  email: "",
-  role: "Customer",
-});
+  // ==========================================
+  // Main Navigation
+  // ==========================================
 
-  const menuItems = [
-  { id: "overview", label: "Overview", icon: <LayoutDashboard size={18} /> },
-  { id: "users", label: "Users", icon: <Users size={18} /> },
-  { id: "pharmacies", label: "Pharmacies", icon: <Store size={18} /> },
-  { id: "medicines", label: "Medicines", icon: <Pill size={18} /> },
-  {
-    id: "reservations",
-    label: "Reservations",
-    icon: <CalendarCheck size={18} />,
-  },
-];
+  const [activeSection, setActiveSection] = useState("overview");
 
-const [pharmacies, setPharmacies] = useState([
-  {
-    id: 1,
-    name: "El Ezaby Pharmacy",
-    location: "Cairo",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Seif Pharmacy",
-    location: "Giza",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "19011 Pharmacy",
-    location: "Alexandria",
-    status: "Inactive",
-  },
-]);
-const filteredPharmacies = pharmacies.filter((pharmacy) =>
-  pharmacy.name.toLowerCase().includes(pharmacySearch.toLowerCase()) ||
-  pharmacy.location.toLowerCase().includes(pharmacySearch.toLowerCase())
-);
-const [medicines, setMedicines] = useState([
-  {
-    id: 1,
-    name: "Panadol",
-    category: "Pain Relief",
-    price: 10,
-    stock: 120,
-    status: "Available",
-  },
-  {
-    id: 2,
-    name: "Augmentin",
-    category: "Antibiotic",
-    price: 25,
-    stock: 80,
-    status: "Available",
-  },
-  {
-    id: 3,
-    name: "Vitamin C",
-    category: "Vitamins",
-    price: 8,
-    stock: 0,
-    status: "Out of Stock",
-  },
-]);
-const filteredMedicines = medicines.filter((medicine) =>
-  medicine.name.toLowerCase().includes(medicineSearch.toLowerCase()) ||
-  medicine.category.toLowerCase().includes(medicineSearch.toLowerCase())
-);
-const [reservations, setReservations] = useState([
-  {
-    id: 1,
-    customer: "Ahmed Ali",
-    medicine: "Panadol",
-    pharmacy: "El Ezaby Pharmacy",
-    date: "11 Sep 2026",
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    customer: "Sara Mohamed",
-    medicine: "Augmentin",
-    pharmacy: "Seif Pharmacy",
-    date: "10 Sep 2026",
-    status: "Confirmed",
-  },
-  {
-    id: 3,
-    customer: "Omar Hassan",
-    medicine: "Vitamin C",
-    pharmacy: "19011 Pharmacy",
-    date: "09 Sep 2026",
-    status: "Pending",
-  },
-]);
+  // ==========================================
+  // Users
+  // ==========================================
 
-const filteredReservations = reservations.filter(
-  (reservation) =>
-    reservation.customer
-      .toLowerCase()
-      .includes(reservationSearch.toLowerCase()) ||
-    reservation.medicine
-      .toLowerCase()
-      .includes(reservationSearch.toLowerCase()) ||
-    reservation.pharmacy
-      .toLowerCase()
-      .includes(reservationSearch.toLowerCase())
-);
-const [users, setUsers] = useState([
-  {
-    id: 1,
-    name: "Ahmed Ali",
-    email: "ahmed@example.com",
-    role: "Customer",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Sara Mohamed",
-    email: "sara@example.com",
-    role: "Customer",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Omar Hassan",
-    email: "omar@example.com",
-    role: "Admin",
-    status: "Active",
-  },
-]);
-const filteredUsers = users.filter((user) =>
-  user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  user.email.toLowerCase().includes(searchTerm.toLowerCase())
-);
-const stats = [
-  {
-    title: "Total Users",
-    value: users.length,
-    description: "Registered users",
-  },
-  {
-    title: "Pharmacies",
-    value: pharmacies.length,
-    description: "Registered pharmacies",
-  },
-  {
-    title: "Medicines",
-    value: medicines.length,
-    description: "Total medicines",
-  },
-  {
-    title: "Reservations",
-    value: reservations.length,
-    description: "Total reservations",
-  },
-  {
-  title: "Pending Reservations",
-  value: reservations.filter(
-    (reservation) => reservation.status === "Pending"
-  ).length,
-  description: "Waiting for confirmation",
-},
-];
-const handleAddUser = () => {
-  if (!newUser.name.trim() || !newUser.email.trim()) {
-    return;
-  }
-  if (!newUser.email.includes("@")) {
-  return;
-  }
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "Ahmed Mohamed",
+      email: "ahmed@test.com",
+      role: "Customer",
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "El Nour Pharmacy",
+      email: "nour@pharmacy.com",
+      role: "Pharmacy",
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: "Mohamed Ali",
+      email: "mohamed@test.com",
+      role: "Customer",
+      status: "Inactive",
+    },
+    {
+      id: 4,
+      name: "Al Shifa Pharmacy",
+      email: "shifa@pharmacy.com",
+      role: "Pharmacy",
+      status: "Active",
+    },
+  ]);
 
-  const user = {
-    id: Date.now(),
-    name: newUser.name,
-    email: newUser.email,
-    role: newUser.role,
-    status: "Active",
-  };
+  const [userSearch, setUserSearch] = useState("");
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
 
-  setUsers([...users, user]);
-
-  setNewUser({
+  const [userForm, setUserForm] = useState({
     name: "",
     email: "",
     role: "Customer",
   });
 
-  setShowAddUser(false);
-  
-};
+  // ==========================================
+  // Pharmacies
+  // ==========================================
+
+  const [pharmacies, setPharmacies] = useState([
+    {
+      id: 1,
+      name: "El Nour Pharmacy",
+      email: "nour@pharmacy.com",
+      phone: "01012345678",
+      address: "Benha, Qalyubia",
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Al Shifa Pharmacy",
+      email: "shifa@pharmacy.com",
+      phone: "01098765432",
+      address: "Benha, Qalyubia",
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: "El Hayah Pharmacy",
+      email: "hayah@pharmacy.com",
+      phone: "01123456789",
+      address: "Banha, Qalyubia",
+      status: "Inactive",
+    },
+  ]);
+
+  const [pharmacySearch, setPharmacySearch] = useState("");
+  const [showPharmacyForm, setShowPharmacyForm] = useState(false);
+  const [editingPharmacyId, setEditingPharmacyId] = useState(null);
+
+  const [pharmacyForm, setPharmacyForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+
+  // ==========================================
+  // Medicines
+  // ==========================================
+
+  const [medicineSearch, setMedicineSearch] = useState("");
+  const [showMedicineForm, setShowMedicineForm] = useState(false);
+  const [editingMedicineId, setEditingMedicineId] = useState(null);
+
+  const [medicineForm, setMedicineForm] = useState({
+    name: "",
+    category: "",
+    description: "",
+  });
+
+  // ==========================================
+  // Reservations
+  // ==========================================
+
+  const [reservations, setReservations] = useState([
+    {
+      id: 1,
+      customer: "Ahmed Mohamed",
+      medicine: "Panadol Extra",
+      pharmacy: "El Nour Pharmacy",
+      date: "2026-09-10",
+      status: "Pending",
+    },
+    {
+      id: 2,
+      customer: "Mohamed Ali",
+      medicine: "Brufen 400",
+      pharmacy: "Al Shifa Pharmacy",
+      date: "2026-09-09",
+      status: "Confirmed",
+    },
+    {
+      id: 3,
+      customer: "Omar Hassan",
+      medicine: "Vitamin C",
+      pharmacy: "El Nour Pharmacy",
+      date: "2026-09-08",
+      status: "Completed",
+    },
+    {
+      id: 4,
+      customer: "Ali Ahmed",
+      medicine: "Augmentin 625",
+      pharmacy: "El Hayah Pharmacy",
+      date: "2026-09-07",
+      status: "Cancelled",
+    },
+  ]);
+
+  const [reservationSearch, setReservationSearch] = useState("");
+
+  // ==========================================
+  // Overview Calculations
+  // ==========================================
+
+  const totalUsers = users.length;
+  const totalPharmacies = pharmacies.length;
+  const totalMedicines = medicines.length;
+  const totalReservations = reservations.length;
+
+  // ==========================================
+  // Filtered Data
+  // ==========================================
+
+  const filteredUsers = useMemo(() => {
+    const search = userSearch.toLowerCase().trim();
+
+    if (!search) {
+      return users;
+    }
+
+    return users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search) ||
+        user.role.toLowerCase().includes(search)
+    );
+  }, [users, userSearch]);
+
+  const filteredPharmacies = useMemo(() => {
+    const search = pharmacySearch.toLowerCase().trim();
+
+    if (!search) {
+      return pharmacies;
+    }
+
+    return pharmacies.filter(
+      (pharmacy) =>
+        pharmacy.name.toLowerCase().includes(search) ||
+        pharmacy.email.toLowerCase().includes(search) ||
+        pharmacy.address.toLowerCase().includes(search)
+    );
+  }, [pharmacies, pharmacySearch]);
+
+  const filteredMedicines = useMemo(() => {
+    const search = medicineSearch.toLowerCase().trim();
+
+    if (!search) {
+      return medicines;
+    }
+
+    return medicines.filter(
+      (medicine) =>
+        medicine.name.toLowerCase().includes(search) ||
+        medicine.category.toLowerCase().includes(search) ||
+        medicine.description.toLowerCase().includes(search)
+    );
+  }, [medicines, medicineSearch]);
+
+  const filteredReservations = useMemo(() => {
+    const search = reservationSearch.toLowerCase().trim();
+
+    if (!search) {
+      return reservations;
+    }
+
+    return reservations.filter(
+      (reservation) =>
+        reservation.customer.toLowerCase().includes(search) ||
+        reservation.medicine.toLowerCase().includes(search) ||
+        reservation.pharmacy.toLowerCase().includes(search) ||
+        reservation.status.toLowerCase().includes(search)
+    );
+  }, [reservations, reservationSearch]);
+
+  // ==========================================
+  // User Functions
+  // ==========================================
+
+  const resetUserForm = () => {
+    setUserForm({
+      name: "",
+      email: "",
+      role: "Customer",
+    });
+
+    setEditingUserId(null);
+    setShowUserForm(false);
+  };
+
+  const handleUserSubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      !userForm.name.trim() ||
+      !userForm.email.trim()
+    ) {
+      return;
+    }
+
+    if (editingUserId !== null) {
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === editingUserId
+            ? {
+                ...user,
+                name: userForm.name.trim(),
+                email: userForm.email.trim(),
+                role: userForm.role,
+              }
+            : user
+        )
+      );
+    } else {
+      setUsers((currentUsers) => [
+        ...currentUsers,
+        {
+          id: Date.now(),
+          name: userForm.name.trim(),
+          email: userForm.email.trim(),
+          role: userForm.role,
+          status: "Active",
+        },
+      ]);
+    }
+
+    resetUserForm();
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUserId(user.id);
+
+    setUserForm({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+
+    setShowUserForm(true);
+  };
+
+  const handleToggleUserStatus = (id) => {
+    setUsers((currentUsers) =>
+      currentUsers.map((user) =>
+        user.id === id
+          ? {
+              ...user,
+              status:
+                user.status === "Active"
+                  ? "Inactive"
+                  : "Active",
+            }
+          : user
+      )
+    );
+  };
+
+  const handleDeleteUser = (id) => {
+    setUsers((currentUsers) =>
+      currentUsers.filter((user) => user.id !== id)
+    );
+  };
+
+  // ==========================================
+  // Pharmacy Functions
+  // ==========================================
+
+  const resetPharmacyForm = () => {
+    setPharmacyForm({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+    });
+
+    setEditingPharmacyId(null);
+    setShowPharmacyForm(false);
+  };
+
+  const handlePharmacySubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      !pharmacyForm.name.trim() ||
+      !pharmacyForm.email.trim()
+    ) {
+      return;
+    }
+
+    if (editingPharmacyId !== null) {
+      setPharmacies((currentPharmacies) =>
+        currentPharmacies.map((pharmacy) =>
+          pharmacy.id === editingPharmacyId
+            ? {
+                ...pharmacy,
+                name: pharmacyForm.name.trim(),
+                email: pharmacyForm.email.trim(),
+                phone: pharmacyForm.phone.trim(),
+                address: pharmacyForm.address.trim(),
+              }
+            : pharmacy
+        )
+      );
+    } else {
+      setPharmacies((currentPharmacies) => [
+        ...currentPharmacies,
+        {
+          id: Date.now(),
+          name: pharmacyForm.name.trim(),
+          email: pharmacyForm.email.trim(),
+          phone: pharmacyForm.phone.trim(),
+          address: pharmacyForm.address.trim(),
+          status: "Active",
+        },
+      ]);
+    }
+
+    resetPharmacyForm();
+  };
+
+  const handleEditPharmacy = (pharmacy) => {
+    setEditingPharmacyId(pharmacy.id);
+
+    setPharmacyForm({
+      name: pharmacy.name,
+      email: pharmacy.email,
+      phone: pharmacy.phone,
+      address: pharmacy.address,
+    });
+
+    setShowPharmacyForm(true);
+  };
+
+  const handleTogglePharmacyStatus = (id) => {
+    setPharmacies((currentPharmacies) =>
+      currentPharmacies.map((pharmacy) =>
+        pharmacy.id === id
+          ? {
+              ...pharmacy,
+              status:
+                pharmacy.status === "Active"
+                  ? "Inactive"
+                  : "Active",
+            }
+          : pharmacy
+      )
+    );
+  };
+
+  const handleDeletePharmacy = (id) => {
+    setPharmacies((currentPharmacies) =>
+      currentPharmacies.filter(
+        (pharmacy) => pharmacy.id !== id
+      )
+    );
+  };
+
+  // ==========================================
+  // Medicine Functions
+  // ==========================================
+
+  const resetMedicineForm = () => {
+    setMedicineForm({
+      name: "",
+      category: "",
+      description: "",
+    });
+
+    setEditingMedicineId(null);
+    setShowMedicineForm(false);
+  };
+
+  const handleMedicineSubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      !medicineForm.name.trim() ||
+      !medicineForm.category.trim()
+    ) {
+      return;
+    }
+
+    const medicineData = {
+      name: medicineForm.name.trim(),
+      category: medicineForm.category.trim(),
+      description: medicineForm.description.trim(),
+    };
+
+    if (editingMedicineId !== null) {
+      updateMedicine(
+        editingMedicineId,
+        medicineData
+      );
+    } else {
+      addMedicine(medicineData);
+    }
+
+    resetMedicineForm();
+  };
+
+  const handleEditMedicine = (medicine) => {
+    setEditingMedicineId(medicine.id);
+
+    setMedicineForm({
+      name: medicine.name,
+      category: medicine.category,
+      description: medicine.description,
+    });
+
+    setShowMedicineForm(true);
+  };
+
+  const handleDeleteMedicine = (id) => {
+    removeMedicine(id);
+
+    if (editingMedicineId === id) {
+      resetMedicineForm();
+    }
+  };
+
+  // ==========================================
+  // Reservation Functions
+  // ==========================================
+
+  const handleConfirmReservation = (id) => {
+    setReservations((currentReservations) =>
+      currentReservations.map((reservation) =>
+        reservation.id === id
+          ? {
+              ...reservation,
+              status: "Confirmed",
+            }
+          : reservation
+      )
+    );
+  };
+
+  const handleDeleteReservation = (id) => {
+    setReservations((currentReservations) =>
+      currentReservations.filter(
+        (reservation) => reservation.id !== id
+      )
+    );
+  };
+
+  // ==========================================
+  // Sidebar Navigation
+  // ==========================================
+
+  const navigationItems = [
+    {
+      id: "overview",
+      label: "Overview",
+      icon: "▦",
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: "♙",
+    },
+    {
+      id: "pharmacies",
+      label: "Pharmacies",
+      icon: "⌂",
+    },
+    {
+      id: "medicines",
+      label: "Medicines",
+      icon: "▣",
+    },
+    {
+      id: "reservations",
+      label: "Reservations",
+      icon: "◷",
+    },
+  ];
+
+  // ==========================================
+  // Render
+  // ==========================================
+
   return (
     <div className="admin-dashboard">
-      <aside className="admin-sidebar">
-        <h2>MediFind</h2>
-        <p className="sidebar-subtitle">Admin Panel</p>
 
-        <nav>
-          {menuItems.map((item) => (
+      {/* ======================================
+          Sidebar
+      ====================================== */}
+
+      <aside className="admin-sidebar">
+
+        <div className="admin-logo">
+          <div className="admin-logo-icon">
+            <span>+</span>
+          </div>
+
+          <span className="admin-logo-text">
+            MediFind
+          </span>
+        </div>
+
+        <nav className="admin-nav">
+
+          {navigationItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveView(item.id)}
-              className={activeView === item.id ? "active" : ""}
+              type="button"
+              className={`admin-nav-item ${
+                activeSection === item.id
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                setActiveSection(item.id)
+              }
             >
-              {item.icon}
-              {item.label}
+              <span className="admin-nav-icon">
+                {item.icon}
+              </span>
+
+              <span>{item.label}</span>
             </button>
           ))}
-        </nav>
-        <button
-        className="logout-button"
-        onClick={() => {
-        const confirmed = window.confirm(
-            "Are you sure you want to logout?"
-        );
 
-        if (confirmed) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            navigate("/login");
-        }
-        }}
-        >
-        <LogOut size={18} />
-        Logout
-        </button>
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <div className="admin-profile">
+            <div className="admin-avatar">
+              A
+            </div>
+
+            <div>
+              <strong>Admin</strong>
+              <span>Administrator</span>
+            </div>
+          </div>
+        </div>
+
       </aside>
 
-    <main className="admin-main">
-        {activeView === "overview" && (
-            <>
-            <h1>Admin Dashboard</h1>
+      {/* ======================================
+          Main Content
+      ====================================== */}
 
-            <div className="stats-grid">
-                {stats.map((stat) => (
-                <div
-                className="stat-card"
-                key={stat.title}
-                onClick={() => {
-                if (stat.title === "Total Users") {
-                    setActiveView("users");
-                } else if (stat.title === "Pharmacies") {
-                    setActiveView("pharmacies");
-                } else if (stat.title === "Medicines") {
-                    setActiveView("medicines");
-                } else if (
-                    stat.title === "Reservations" ||
-                    stat.title === "Pending Reservations"
-                ) {
-                    setActiveView("reservations");
-                }
-                }}
+      <main className="admin-main">
+
+        {/* ====================================
+            Header
+        ==================================== */}
+
+        <header className="admin-header">
+
+          <div>
+            <h1>
+              {activeSection === "overview" &&
+                "Overview"}
+
+              {activeSection === "users" &&
+                "Users Management"}
+
+              {activeSection === "pharmacies" &&
+                "Pharmacy Management"}
+
+              {activeSection === "medicines" &&
+                "Medicine Management"}
+
+              {activeSection === "reservations" &&
+                "Reservations Management"}
+            </h1>
+
+            <p>
+              Manage and monitor the MediFind platform
+            </p>
+          </div>
+
+        </header>
+
+        {/* ====================================
+            Overview
+        ==================================== */}
+
+        {activeSection === "overview" && (
+          <section className="admin-section">
+
+            <div className="admin-stats-grid">
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon">
+                  ♙
+                </div>
+
+                <div>
+                  <span>Total Users</span>
+                  <strong>{totalUsers}</strong>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon">
+                  ⌂
+                </div>
+
+                <div>
+                  <span>Total Pharmacies</span>
+                  <strong>
+                    {totalPharmacies}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon">
+                  ▣
+                </div>
+
+                <div>
+                  <span>Total Medicines</span>
+                  <strong>
+                    {totalMedicines}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon">
+                  ◷
+                </div>
+
+                <div>
+                  <span>Total Reservations</span>
+                  <strong>
+                    {totalReservations}
+                  </strong>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="admin-content-card">
+
+              <div className="admin-card-header">
+                <div>
+                  <h2>Recent Reservations</h2>
+                  <p>
+                    Latest activity on the platform
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-secondary-button"
+                  onClick={() =>
+                    setActiveSection("reservations")
+                  }
                 >
-                    <h3>{stat.title}</h3>
-                    <p>{stat.value}</p>
-                    <span>{stat.description}</span>
-                </div>
-                ))}
-            </div>
-            <div className="recent-activity">
-            <h2>Recent Activity</h2>
-            
-
-            <div className="activity-item">
-                <div>
-                <strong>New user registered</strong>
-                <p>Ahmed Ali created a new account</p>
-                </div>
-                <span>Today</span>
-            </div>
-
-            <div className="activity-item">
-                <div>
-                <strong>New pharmacy added</strong>
-                <p>El Ezaby Pharmacy joined the platform</p>
-                </div>
-                <span>Yesterday</span>
-            </div>
-
-            <div className="activity-item">
-                <div>
-                <strong>New reservation</strong>
-                <p>Sara Mohamed made a reservation</p>
-                </div>
-                <span>2 days ago</span>
-            </div>
-            </div>
-            <div className="quick-access">
-            <h2>Quick Access</h2>
-
-            <div className="quick-access-grid">
-                <button onClick={() => setActiveView("users")}>
-                Manage Users
+                  View All
                 </button>
+              </div>
 
-                <button onClick={() => setActiveView("pharmacies")}>
-                Manage Pharmacies
-                </button>
+              <div className="admin-table-wrapper">
 
-                <button onClick={() => setActiveView("medicines")}>
-                Manage Medicines
-                </button>
+                <table className="admin-table">
 
-                <button onClick={() => setActiveView("reservations")}>
-                View Reservations
-                </button>
-            </div>
-            </div>
-            <div className="platform-health">
-            <h2>Platform Health</h2>
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Medicine</th>
+                      <th>Pharmacy</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
 
-            <div className="health-item">
-                <div>
-                <strong>System Status</strong>
-                <p>All systems are operating normally</p>
-                </div>
-                <span className="health-online">Online</span>
+                  <tbody>
+
+                    {reservations
+                      .slice(0, 5)
+                      .map((reservation) => (
+                        <tr key={reservation.id}>
+
+                          <td>
+                            {reservation.customer}
+                          </td>
+
+                          <td>
+                            {reservation.medicine}
+                          </td>
+
+                          <td>
+                            {reservation.pharmacy}
+                          </td>
+
+                          <td>
+                            {reservation.date}
+                          </td>
+
+                          <td>
+                            <span
+                              className={`admin-status ${
+                                reservation.status
+                                  .toLowerCase()
+                              }`}
+                            >
+                              {reservation.status}
+                            </span>
+                          </td>
+
+                        </tr>
+                      ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
             </div>
 
-            <div className="health-item">
-                <div>
-                <strong>Database</strong>
-                <p>Database connection is stable</p>
-                </div>
-                <span className="health-online">Connected</span>
-            </div>
-
-            <div className="health-item">
-                <div>
-                <strong>API</strong>
-                <p>API services are responding normally</p>
-                </div>
-                <span className="health-online">Healthy</span>
-            </div>
-            </div>
-            </>
-            
+          </section>
         )}
 
-    {activeView === "users" && (
-    <>
-        <h1>Users</h1>
-        <div className="admin-search">
-        <Search size={18} />
-        <input
-            type="text"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        </div>
-        <button className="add-button" onClick={() => setShowAddUser(true)}>
-        <Plus size={18} />
-        Add User
-        </button>
-        {showAddUser && (
-    <div className="add-user-form">
-        <input
-        type="text"
-        placeholder="Full Name"
-        value={newUser.name}
-        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-        />
+        {/* ====================================
+            Users
+        ==================================== */}
 
-        <input
-        type="email"
-        placeholder="Email Address"
-        value={newUser.email}
-        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-        />
+        {activeSection === "users" && (
+          <section className="admin-section">
 
-        <select
-        value={newUser.role}
-        onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-        >
-        <option value="Customer">Customer</option>
-        <option value="Admin">Admin</option>
-        </select>
+            <div className="admin-toolbar">
 
-        <div>
-        <button className="save-button" onClick={handleAddUser}>
-            Save
-        </button>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(event) =>
+                  setUserSearch(event.target.value)
+                }
+                className="admin-search-input"
+              />
 
-        <button
-            className="cancel-button"
-            onClick={() => setShowAddUser(false)}
-        >
-            Cancel
-        </button>
-        </div>
-    </div>
-    )}
-    {editingUser && (
-    <div className="add-user-form">
-        <input
-        type="text"
-        placeholder="Name"
-        value={editingUser.name}
-        onChange={(e) =>
-            setEditingUser({
-            ...editingUser,
-            name: e.target.value,
-            })
-        }
-        />
-
-        <input
-        type="email"
-        placeholder="Email"
-        value={editingUser.email}
-        onChange={(e) =>
-            setEditingUser({
-            ...editingUser,
-            email: e.target.value,
-            })
-        }
-        />
-
-        <select
-        value={editingUser.role}
-        onChange={(e) =>
-            setEditingUser({
-            ...editingUser,
-            role: e.target.value,
-            })
-        }
-        >
-        <option value="Customer">Customer</option>
-        <option value="Admin">Admin</option>
-        </select>
-
-        <div>
-        <button
-            className="save-button"
-            onClick={() => {
-            if (
-                !editingUser.name.trim() ||
-                !editingUser.email.trim()
-            ) {
-                return;
-            }
-
-            if (!editingUser.email.includes("@")) {
-                return;
-            }
-
-            setUsers(
-                users.map((u) =>
-                u.id === editingUser.id ? editingUser : u
-                )
-            );
-
-            setEditingUser(null);
-            }}
-        >
-            Save Changes
-        </button>
-
-        <button
-            className="cancel-button"
-            onClick={() => setEditingUser(null)}
-        >
-            Cancel
-        </button>
-        </div>
-    </div>
-    )}
-        <div className="admin-table-wrapper">
-        <table className="admin-table">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            {filteredUsers.map((user) => (
-                <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td> <span className="status-badge">{user.status}</span> </td>
-                <td>
-                <button
-                    className="status-button"
-                    onClick={() => {
-                    setUsers(
-                        users.map((u) =>
-                        u.id === user.id
-                            ? {
-                                ...u,
-                                status:
-                                u.status === "Active"
-                                    ? "Inactive"
-                                    : "Active",
-                            }
-                            : u
-                        )
-                    );
-                    }}
-                >
-                    {user.status === "Active" ? "Deactivate" : "Activate"}
-                </button>
-                <button
-                className="edit-button"
-                onClick={() => setEditingUser(user)}
-                >
-                    <Edit size={14} />
-                    Edit
-                </button>
-                <button
-                className="delete-button"
+              <button
+                type="button"
+                className="admin-primary-button"
                 onClick={() => {
-                setUsers(users.filter((u) => u.id !== user.id));
+                  setEditingUserId(null);
+
+                  setUserForm({
+                    name: "",
+                    email: "",
+                    role: "Customer",
+                  });
+
+                  setShowUserForm(true);
                 }}
-            >
-                Delete
-            </button>
-                </td>
-                </tr>
-            ))}
-            {filteredUsers.length === 0 && (
-            <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                No users found
-                </td>
-            </tr>
-            )}
-            </tbody>
-        </table>
-        </div>
-    </>
-    )}
+              >
+                + Add User
+              </button>
 
-        {activeView === "pharmacies" && (
-        <>
-            <h1>Pharmacies</h1>
-            <button
-            className="add-button"
-            onClick={() => setShowAddPharmacy(true)}
-            >
-            <Plus size={18} />
-            Add Pharmacy
-            </button>
-            {showAddPharmacy && (
-            <div className="add-user-form">
-                <input
-                type="text"
-                placeholder="Pharmacy Name"
-                value={newPharmacy.name}
-                onChange={(e) =>
-                    setNewPharmacy({
-                    ...newPharmacy,
-                    name: e.target.value,
-                    })
-                }
-                />
-
-                <input
-                type="text"
-                placeholder="Location"
-                value={newPharmacy.location}
-                onChange={(e) =>
-                    setNewPharmacy({
-                    ...newPharmacy,
-                    location: e.target.value,
-                    })
-                }
-                />
-
-                <div>
-                <button
-                    className="save-button"
-                    onClick={() => {
-                    if (!newPharmacy.name.trim() || !newPharmacy.location.trim()) {
-                        return;
-                    }
-
-                    setPharmacies([
-                        ...pharmacies,
-                        {
-                        id: Date.now(),
-                        name: newPharmacy.name,
-                        location: newPharmacy.location,
-                        status: "Active",
-                        },
-                    ]);
-
-                    setNewPharmacy({
-                        name: "",
-                        location: "",
-                    });
-
-                    setShowAddPharmacy(false);
-                    }}
-                >
-                    Save
-                </button>
-
-                <button
-                    className="cancel-button"
-                    onClick={() => setShowAddPharmacy(false)}
-                >
-                    Cancel
-                </button>
-                </div>
             </div>
-            )}
-            <div className="admin-search">
-            <Search size={18} />
 
-            <input
+            {showUserForm && (
+              <div className="admin-form-card">
+
+                <div className="admin-card-header">
+                  <div>
+                    <h2>
+                      {editingUserId !== null
+                        ? "Edit User"
+                        : "Add User"}
+                    </h2>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={handleUserSubmit}
+                  className="admin-form"
+                >
+
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    value={userForm.name}
+                    onChange={(event) =>
+                      setUserForm({
+                        ...userForm,
+                        name: event.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={userForm.email}
+                    onChange={(event) =>
+                      setUserForm({
+                        ...userForm,
+                        email: event.target.value,
+                      })
+                    }
+                  />
+
+                  <select
+                    value={userForm.role}
+                    onChange={(event) =>
+                      setUserForm({
+                        ...userForm,
+                        role: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="Customer">
+                      Customer
+                    </option>
+
+                    <option value="Pharmacy">
+                      Pharmacy
+                    </option>
+
+                    <option value="Admin">
+                      Admin
+                    </option>
+                  </select>
+
+                  <div className="admin-form-actions">
+
+                    <button
+                      type="submit"
+                      className="admin-primary-button"
+                    >
+                      {editingUserId !== null
+                        ? "Update User"
+                        : "Add User"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-secondary-button"
+                      onClick={resetUserForm}
+                    >
+                      Cancel
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </div>
+            )}
+
+            <div className="admin-content-card">
+
+              <div className="admin-card-header">
+                <div>
+                  <h2>All Users</h2>
+                  <p>
+                    Manage customer, pharmacy and admin
+                    accounts
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-table-wrapper">
+
+                <table className="admin-table">
+
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                    {filteredUsers.map((user) => (
+                      <tr key={user.id}>
+
+                        <td>{user.name}</td>
+
+                        <td>{user.email}</td>
+
+                        <td>{user.role}</td>
+
+                        <td>
+                          <span
+                            className={`admin-status ${
+                              user.status.toLowerCase()
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+
+                        <td>
+
+                          <div className="admin-action-buttons">
+
+                            <button
+                              type="button"
+                              className="admin-edit-button"
+                              onClick={() =>
+                                handleEditUser(user)
+                              }
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              className="admin-toggle-button"
+                              onClick={() =>
+                                handleToggleUserStatus(
+                                  user.id
+                                )
+                              }
+                            >
+                              {user.status === "Active"
+                                ? "Deactivate"
+                                : "Activate"}
+                            </button>
+
+                            <button
+                              type="button"
+                              className="admin-delete-button"
+                              onClick={() =>
+                                handleDeleteUser(
+                                  user.id
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+
+                          </div>
+
+                        </td>
+
+                      </tr>
+                    ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </section>
+        )}
+
+        {/* ====================================
+            Pharmacies
+        ==================================== */}
+
+        {activeSection === "pharmacies" && (
+          <section className="admin-section">
+
+            <div className="admin-toolbar">
+
+              <input
                 type="text"
                 placeholder="Search pharmacies..."
                 value={pharmacySearch}
-                onChange={(e) => setPharmacySearch(e.target.value)}
-            />
+                onChange={(event) =>
+                  setPharmacySearch(
+                    event.target.value
+                  )
+                }
+                className="admin-search-input"
+              />
+
+              <button
+                type="button"
+                className="admin-primary-button"
+                onClick={() => {
+                  setEditingPharmacyId(null);
+
+                  setPharmacyForm({
+                    name: "",
+                    email: "",
+                    phone: "",
+                    address: "",
+                  });
+
+                  setShowPharmacyForm(true);
+                }}
+              >
+                + Add Pharmacy
+              </button>
+
             </div>
-            {editingPharmacy && (
-            <div className="add-user-form">
-                <input
-                type="text"
-                placeholder="Pharmacy Name"
-                value={editingPharmacy.name}
-                onChange={(e) =>
-                    setEditingPharmacy({
-                    ...editingPharmacy,
-                    name: e.target.value,
-                    })
-                }
-                />
 
-                <input
-                type="text"
-                placeholder="Location"
-                value={editingPharmacy.location}
-                onChange={(e) =>
-                    setEditingPharmacy({
-                    ...editingPharmacy,
-                    location: e.target.value,
-                    })
-                }
-                />
+            {showPharmacyForm && (
+              <div className="admin-form-card">
 
-                <div>
-                <button
-                    className="save-button"
-                    onClick={() => {
-                    setPharmacies(
-                        pharmacies.map((p) =>
-                        p.id === editingPharmacy.id
-                            ? editingPharmacy
-                            : p
-                        )
-                    );
-
-                    setEditingPharmacy(null);
-                    }}
-                >
-                    Save Changes
-                </button>
-
-                <button
-                    className="cancel-button"
-                    onClick={() => setEditingPharmacy(null)}
-                >
-                    Cancel
-                </button>
+                <div className="admin-card-header">
+                  <div>
+                    <h2>
+                      {editingPharmacyId !== null
+                        ? "Edit Pharmacy"
+                        : "Add Pharmacy"}
+                    </h2>
+                  </div>
                 </div>
-            </div>
+
+                <form
+                  onSubmit={handlePharmacySubmit}
+                  className="admin-form"
+                >
+
+                  <input
+                    type="text"
+                    placeholder="Pharmacy Name"
+                    value={pharmacyForm.name}
+                    onChange={(event) =>
+                      setPharmacyForm({
+                        ...pharmacyForm,
+                        name: event.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={pharmacyForm.email}
+                    onChange={(event) =>
+                      setPharmacyForm({
+                        ...pharmacyForm,
+                        email: event.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Phone"
+                    value={pharmacyForm.phone}
+                    onChange={(event) =>
+                      setPharmacyForm({
+                        ...pharmacyForm,
+                        phone: event.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Address"
+                    value={pharmacyForm.address}
+                    onChange={(event) =>
+                      setPharmacyForm({
+                        ...pharmacyForm,
+                        address: event.target.value,
+                      })
+                    }
+                  />
+
+                  <div className="admin-form-actions">
+
+                    <button
+                      type="submit"
+                      className="admin-primary-button"
+                    >
+                      {editingPharmacyId !== null
+                        ? "Update Pharmacy"
+                        : "Add Pharmacy"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-secondary-button"
+                      onClick={resetPharmacyForm}
+                    >
+                      Cancel
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </div>
             )}
-            <div className="admin-table-wrapper">
-            <table className="admin-table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
 
-                <tbody>
-                {filteredPharmacies.map((pharmacy) => (
-                    <tr key={pharmacy.id}>
-                    <td>{pharmacy.name}</td>
-                    <td>{pharmacy.location}</td>
-                    <td>
-                        <span className="status-badge">
-                        {pharmacy.status}
-                        </span>
-                    </td>
-                    <td>
-                    <button
-                        className="status-button"
-                        onClick={() => {
-                        setPharmacies(
-                            pharmacies.map((p) =>
-                            p.id === pharmacy.id
-                                ? {
-                                    ...p,
-                                    status:
-                                    p.status === "Active"
-                                        ? "Inactive"
-                                        : "Active",
-                                }
-                                : p
-                            )
-                        );
-                        }}
-                    >
-                        {pharmacy.status === "Active" ? "Deactivate" : "Activate"}
-                    </button>
+            <div className="admin-content-card">
 
-                    <button
-                        className="edit-button"
-                        onClick={() => setEditingPharmacy(pharmacy)}
-                    >
-                        <Edit size={14} />
-                        Edit
-                    </button>
-                    <button
-                    className="delete-button"
-                    onClick={() => {
-                        setPharmacies(
-                        pharmacies.filter((p) => p.id !== pharmacy.id)
-                        );
-                    }}
-                    >
-                    Delete
-                    </button>
-                    </td>
+              <div className="admin-card-header">
+                <div>
+                  <h2>All Pharmacies</h2>
+                  <p>
+                    Manage registered pharmacies
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-table-wrapper">
+
+                <table className="admin-table">
+
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Address</th>
+                      <th>Status</th>
+                      <th>Actions</th>
                     </tr>
-                ))}
-                {filteredPharmacies.length === 0 && (
-                <tr>
-                    <td colSpan="4" style={{ textAlign: "center" }}>
-                    No pharmacies found
-                    </td>
-                </tr>
-                )}
-                </tbody>
-            </table>
+                  </thead>
+
+                  <tbody>
+
+                    {filteredPharmacies.map(
+                      (pharmacy) => (
+                        <tr key={pharmacy.id}>
+
+                          <td>{pharmacy.name}</td>
+
+                          <td>{pharmacy.email}</td>
+
+                          <td>{pharmacy.phone}</td>
+
+                          <td>{pharmacy.address}</td>
+
+                          <td>
+                            <span
+                              className={`admin-status ${
+                                pharmacy.status.toLowerCase()
+                              }`}
+                            >
+                              {pharmacy.status}
+                            </span>
+                          </td>
+
+                          <td>
+
+                            <div className="admin-action-buttons">
+
+                              <button
+                                type="button"
+                                className="admin-edit-button"
+                                onClick={() =>
+                                  handleEditPharmacy(
+                                    pharmacy
+                                  )
+                                }
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                type="button"
+                                className="admin-toggle-button"
+                                onClick={() =>
+                                  handleTogglePharmacyStatus(
+                                    pharmacy.id
+                                  )
+                                }
+                              >
+                                {pharmacy.status ===
+                                "Active"
+                                  ? "Deactivate"
+                                  : "Activate"}
+                              </button>
+
+                              <button
+                                type="button"
+                                className="admin-delete-button"
+                                onClick={() =>
+                                  handleDeletePharmacy(
+                                    pharmacy.id
+                                  )
+                                }
+                              >
+                                Delete
+                              </button>
+
+                            </div>
+
+                          </td>
+
+                        </tr>
+                      )
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
             </div>
-        </>
+
+          </section>
         )}
 
-        {activeView === "medicines" && (
-        <>
-            <h1>Medicines</h1>
-            <button
-            className="add-button"
-            onClick={() => setShowAddMedicine(true)}
-            >
-            <Plus size={18} />
-            Add Medicine
-            </button>
-            <div className="admin-search">
-            <Search size={18} />
+        {/* ====================================
+            Medicines
+        ==================================== */}
 
-            <input
+        {activeSection === "medicines" && (
+          <section className="admin-section">
+
+            <div className="admin-toolbar">
+
+              <input
                 type="text"
                 placeholder="Search medicines..."
                 value={medicineSearch}
-                onChange={(e) => setMedicineSearch(e.target.value)}
-            />
+                onChange={(event) =>
+                  setMedicineSearch(
+                    event.target.value
+                  )
+                }
+                className="admin-search-input"
+              />
+
+              <button
+                type="button"
+                className="admin-primary-button"
+                onClick={() => {
+                  setEditingMedicineId(null);
+
+                  setMedicineForm({
+                    name: "",
+                    category: "",
+                    description: "",
+                  });
+
+                  setShowMedicineForm(true);
+                }}
+              >
+                + Add Medicine
+              </button>
+
             </div>
-            {showAddMedicine && (
-            <div className="add-user-form">
-                <input
-                type="text"
-                placeholder="Medicine Name"
-                value={newMedicine.name}
-                onChange={(e) =>
-                    setNewMedicine({
-                    ...newMedicine,
-                    name: e.target.value,
-                    })
-                }
-                />
 
-                <input
-                type="text"
-                placeholder="Category"
-                value={newMedicine.category}
-                onChange={(e) =>
-                    setNewMedicine({
-                    ...newMedicine,
-                    category: e.target.value,
-                    })
-                }
-                />
+            {showMedicineForm && (
+              <div className="admin-form-card">
 
-                <input
-                type="number"
-                placeholder="Price"
-                value={newMedicine.price}
-                onChange={(e) =>
-                    setNewMedicine({
-                    ...newMedicine,
-                    price: e.target.value,
-                    })
-                }
-                />
+                <div className="admin-card-header">
+                  <div>
+                    <h2>
+                      {editingMedicineId !== null
+                        ? "Edit Medicine"
+                        : "Add Medicine"}
+                    </h2>
 
-                <input
-                type="number"
-                placeholder="Stock"
-                value={newMedicine.stock}
-                onChange={(e) =>
-                    setNewMedicine({
-                    ...newMedicine,
-                    stock: e.target.value,
-                    })
-                }
-                />
+                    <p>
+                      Medicine catalog information only
+                    </p>
+                  </div>
+                </div>
 
-                <div>
-                <button
-                    className="save-button"
-                    onClick={() => {
-                    if (
-                        !newMedicine.name.trim() ||
-                        !newMedicine.category.trim() ||
-                        newMedicine.price === "" ||
-                        newMedicine.stock === ""
-                    ) {
-                        return;
+                <form
+                  onSubmit={handleMedicineSubmit}
+                  className="admin-form"
+                >
+
+                  <input
+                    type="text"
+                    placeholder="Medicine Name"
+                    value={medicineForm.name}
+                    onChange={(event) =>
+                      setMedicineForm({
+                        ...medicineForm,
+                        name: event.target.value,
+                      })
                     }
+                  />
 
-                    const stock = Number(newMedicine.stock);
+                  <input
+                    type="text"
+                    placeholder="Category"
+                    value={medicineForm.category}
+                    onChange={(event) =>
+                      setMedicineForm({
+                        ...medicineForm,
+                        category:
+                          event.target.value,
+                      })
+                    }
+                  />
 
-                    setMedicines([
-                        ...medicines,
-                        {
-                        id: Date.now(),
-                        name: newMedicine.name,
-                        category: newMedicine.category,
-                        price: Number(newMedicine.price),
-                        stock: stock,
-                        status: stock > 0 ? "Available" : "Out of Stock",
-                        },
-                    ]);
+                  <textarea
+                    placeholder="Description"
+                    value={medicineForm.description}
+                    onChange={(event) =>
+                      setMedicineForm({
+                        ...medicineForm,
+                        description:
+                          event.target.value,
+                      })
+                    }
+                    rows="4"
+                  />
 
-                    setNewMedicine({
-                        name: "",
-                        category: "",
-                        price: "",
-                        stock: "",
-                    });
+                  <div className="admin-form-actions">
 
-                    setShowAddMedicine(false);
-                    }}
-                >
-                    Save
-                </button>
+                    <button
+                      type="submit"
+                      className="admin-primary-button"
+                    >
+                      {editingMedicineId !== null
+                        ? "Update Medicine"
+                        : "Add Medicine"}
+                    </button>
 
-                <button
-                    className="cancel-button"
-                    onClick={() => setShowAddMedicine(false)}
-                >
-                    Cancel
-                </button>
-                </div>
-            </div>
+                    <button
+                      type="button"
+                      className="admin-secondary-button"
+                      onClick={resetMedicineForm}
+                    >
+                      Cancel
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </div>
             )}
-            {editingMedicine && (
-            <div className="add-user-form">
-                <input
-                type="text"
-                placeholder="Medicine Name"
-                value={editingMedicine.name}
-                onChange={(e) =>
-                    setEditingMedicine({
-                    ...editingMedicine,
-                    name: e.target.value,
-                    })
-                }
-                />
 
-                <input
-                type="text"
-                placeholder="Category"
-                value={editingMedicine.category}
-                onChange={(e) =>
-                    setEditingMedicine({
-                    ...editingMedicine,
-                    category: e.target.value,
-                    })
-                }
-                />
+            <div className="admin-content-card">
 
-                <input
-                type="number"
-                placeholder="Price"
-                value={editingMedicine.price}
-                onChange={(e) =>
-                    setEditingMedicine({
-                    ...editingMedicine,
-                    price: Number(e.target.value),
-                    })
-                }
-                />
-
-                <input
-                type="number"
-                placeholder="Stock"
-                value={editingMedicine.stock}
-                onChange={(e) =>
-                    setEditingMedicine({
-                    ...editingMedicine,
-                    stock: Number(e.target.value),
-                    })
-                }
-                />
-
+              <div className="admin-card-header">
                 <div>
-                <button
-                    className="save-button"
-                    onClick={() => {
-                    const updatedMedicine = {
-                        ...editingMedicine,
-                        status:
-                        Number(editingMedicine.stock) > 0
-                            ? "Available"
-                            : "Out of Stock",
-                    };
+                  <h2>Medicine Catalog</h2>
 
-                    setMedicines(
-                        medicines.map((m) =>
-                        m.id === editingMedicine.id
-                            ? updatedMedicine
-                            : m
-                        )
-                    );
-
-                    setEditingMedicine(null);
-                    }}
-                >
-                    Save Changes
-                </button>
-
-                <button
-                    className="cancel-button"
-                    onClick={() => setEditingMedicine(null)}
-                >
-                    Cancel
-                </button>
+                  <p>
+                    Manage medicines available in the
+                    MediFind system
+                  </p>
                 </div>
-            </div>
-            )}
-            <div className="admin-table-wrapper">
-            <table className="admin-table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+              </div>
 
-                <tbody>
-                {filteredMedicines.map((medicine) => (
-                    <tr key={medicine.id}>
-                    <td>{medicine.name}</td>
-                    <td>{medicine.category}</td>
-                    <td>${medicine.price}</td>
-                    <td>{medicine.stock}</td>
-                    <td>
-                        <span className="status-badge">
-                        {medicine.status}
-                        </span>
-                    </td>
-                    <td>
-                    <button
-                    className="status-button"
-                    onClick={() => {
-                        setMedicines(
-                        medicines.map((m) =>
-                            m.id === medicine.id
-                            ? {
-                                ...m,
-                                status:
-                                    m.status === "Available"
-                                    ? "Out of Stock"
-                                    : m.stock > 0
-                                    ? "Available"
-                                    : "Out of Stock",
-                                }
-                            : m
-                        )
-                        );
-                    }}
-                    >
-                    {medicine.status === "Available"
-                        ? "Disable"
-                        : "Enable"}
-                    </button>
+              <div className="admin-table-wrapper">
 
-                    <button
-                        className="edit-button"
-                        onClick={() => setEditingMedicine(medicine)}
-                    >
-                        <Edit size={14} />
-                        Edit
-                    </button>
-                    <button
-                    className="delete-button"
-                    onClick={() => {
-                        setMedicines(medicines.filter((m) => m.id !== medicine.id));
-                    }}
-                    >
-                        Delete
-                    </button>
-                    </td>
+                <table className="admin-table">
+
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Description</th>
+                      <th>Actions</th>
                     </tr>
-                ))}
-                {filteredMedicines.length === 0 && (
-                <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                    No medicines found
-                    </td>
-                </tr>
-                )}
-                </tbody>
-            </table>
+                  </thead>
+
+                  <tbody>
+
+                    {filteredMedicines.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="4"
+                          className="admin-empty-cell"
+                        >
+                          No medicines found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredMedicines.map(
+                        (medicine) => (
+                          <tr key={medicine.id}>
+
+                            <td>
+                              <strong>
+                                {medicine.name}
+                              </strong>
+                            </td>
+
+                            <td>
+                              {medicine.category}
+                            </td>
+
+                            <td>
+                              {medicine.description ||
+                                "No description"}
+                            </td>
+
+                            <td>
+
+                              <div className="admin-action-buttons">
+
+                                <button
+                                  type="button"
+                                  className="admin-edit-button"
+                                  onClick={() =>
+                                    handleEditMedicine(
+                                      medicine
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="admin-delete-button"
+                                  onClick={() =>
+                                    handleDeleteMedicine(
+                                      medicine.id
+                                    )
+                                  }
+                                >
+                                  Delete
+                                </button>
+
+                              </div>
+
+                            </td>
+
+                          </tr>
+                        )
+                      )
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
             </div>
-        </>
+
+          </section>
         )}
-        {activeView === "reservations" && (
-        <>
-            <h1>Reservations</h1>
-            <div className="admin-search">
-            <Search size={18} />
-            <input
+
+        {/* ====================================
+            Reservations
+        ==================================== */}
+
+        {activeSection === "reservations" && (
+          <section className="admin-section">
+
+            <div className="admin-toolbar">
+
+              <input
                 type="text"
                 placeholder="Search reservations..."
                 value={reservationSearch}
-                onChange={(e) => setReservationSearch(e.target.value)}
-            />
+                onChange={(event) =>
+                  setReservationSearch(
+                    event.target.value
+                  )
+                }
+                className="admin-search-input"
+              />
+
             </div>
 
-            <div className="admin-table-wrapper">
-            <table className="admin-table">
-                <thead>
-                <tr>
-                    <th>Customer</th>
-                    <th>Medicine</th>
-                    <th>Pharmacy</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+            <div className="admin-content-card">
 
-                <tbody>
-                {filteredReservations.map((reservation) => (
-                    <tr key={reservation.id}>
-                    <td>{reservation.customer}</td>
-                    <td>{reservation.medicine}</td>
-                    <td>{reservation.pharmacy}</td>
-                    <td>{reservation.date}</td>
-                    <td>
-                        <span className={`status-badge ${
-                            reservation.status === "Confirmed"
-                            ? "status-confirmed"
-                            : "status-pending"
-                        }`}
-                        >
-                        {reservation.status}
-                        </span>
-                    </td>
-                    <td>
-                    <button
-                        className="status-button"
-                        onClick={() => {
-                        if (reservation.status === "Pending") {
-                            setReservations(
-                            reservations.map((r) =>
-                                r.id === reservation.id
-                                ? { ...r, status: "Confirmed" }
-                                : r
-                            )
-                            );
-                        }
-                        }}
-                    >
-                        {reservation.status === "Confirmed" ? "View" : "Confirm"}
-                    </button>
-                    <button
-                    className="delete-button"
-                    onClick={() => {
-                        setReservations(
-                        reservations.filter((r) => r.id !== reservation.id)
-                        );
-                    }}
-                    >
-                    <Trash2 size={14} />
-                    Delete
-                    </button>
-                    </td>
+              <div className="admin-card-header">
+                <div>
+                  <h2>All Reservations</h2>
+
+                  <p>
+                    Monitor medicine reservation
+                    requests
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-table-wrapper">
+
+                <table className="admin-table">
+
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Medicine</th>
+                      <th>Pharmacy</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
                     </tr>
-                ))}
-                {filteredReservations.length === 0 && (
-                <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                    No reservations found
-                    </td>
-                </tr>
-                )}
-                </tbody>
-            </table>
-            </div>
-        </>
-        )}
-            </main>
-            </div>
-        );
-        }
+                  </thead>
 
+                  <tbody>
+
+                    {filteredReservations.length ===
+                    0 ? (
+                      <tr>
+                        <td
+                          colSpan="6"
+                          className="admin-empty-cell"
+                        >
+                          No reservations found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredReservations.map(
+                        (reservation) => (
+                          <tr
+                            key={reservation.id}
+                          >
+
+                            <td>
+                              {reservation.customer}
+                            </td>
+
+                            <td>
+                              {reservation.medicine}
+                            </td>
+
+                            <td>
+                              {reservation.pharmacy}
+                            </td>
+
+                            <td>
+                              {reservation.date}
+                            </td>
+
+                            <td>
+                              <span
+                                className={`admin-status ${
+                                  reservation.status.toLowerCase()
+                                }`}
+                              >
+                                {reservation.status}
+                              </span>
+                            </td>
+
+                            <td>
+
+                              <div className="admin-action-buttons">
+
+                                {reservation.status ===
+                                  "Pending" && (
+                                  <button
+                                    type="button"
+                                    className="admin-edit-button"
+                                    onClick={() =>
+                                      handleConfirmReservation(
+                                        reservation.id
+                                      )
+                                    }
+                                  >
+                                    Confirm
+                                  </button>
+                                )}
+
+                                <button
+                                  type="button"
+                                  className="admin-delete-button"
+                                  onClick={() =>
+                                    handleDeleteReservation(
+                                      reservation.id
+                                    )
+                                  }
+                                >
+                                  Delete
+                                </button>
+
+                              </div>
+
+                            </td>
+
+                          </tr>
+                        )
+                      )
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </section>
+        )}
+
+      </main>
+
+    </div>
+  );
+}
 
 export default AdminDashboard;

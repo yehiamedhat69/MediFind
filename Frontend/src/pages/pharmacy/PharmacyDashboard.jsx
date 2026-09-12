@@ -1,57 +1,34 @@
-import { useEffect, useState } from "react";
-import { getPharmacyDashboard } from "../../services/pharmacyService";
+import { useNavigate } from "react-router-dom";
 import "./PharmacyDashboard.css";
 
 const PharmacyDashboard = () => {
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  // Temporary mock data
+  // We will replace this with the API later in Task 19.
+  const dashboard = {
+    pharmacy: {
+      name: "El Nour Pharmacy",
+      phone: "01012345678",
+      address: "Benha, Qalyubia",
+    },
 
-        const data = await getPharmacyDashboard();
-        setDashboard(data);
-      } catch (err) {
-        setError("Unable to load dashboard data.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    inventory: {
+      availableMedicines: 24,
+      totalStock: 156,
+      lowStock: 4,
+    },
 
-    loadDashboard();
-  }, []);
+    reservations: {
+      pending: 5,
+      confirmed: 8,
+      completed: 21,
+      cancelled: 3,
+      total: 37,
+    },
+  };
 
-  if (loading) {
-    return (
-      <div className="dashboard-state">
-        <div className="loader"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="dashboard-state error-state">
-        <h2>Something went wrong</h2>
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  if (!dashboard) {
-    return null;
-  }
-
-  const {
-    pharmacy,
-    inventory,
-    reservations,
-  } = dashboard;
+  const { pharmacy, inventory, reservations } = dashboard;
 
   return (
     <div className="pharmacy-dashboard">
@@ -60,167 +37,234 @@ const PharmacyDashboard = () => {
       <section className="welcome-section">
         <div>
           <p className="welcome-label">Welcome back</p>
-          <h1>{pharmacy?.name || "Pharmacy"}</h1>
+
+          <h1>{pharmacy.name}</h1>
+
           <p>
             Manage your pharmacy, inventory and reservations
             from one place.
           </p>
         </div>
 
-        <div className="welcome-icon">
-          +
-        </div>
+        <div className="welcome-icon">+</div>
       </section>
+
 
       {/* Pharmacy Information */}
       <section className="section">
+
         <div className="section-header">
           <h2>Pharmacy Information</h2>
         </div>
 
         <div className="info-grid">
+
           <div className="info-card">
             <span>Pharmacy Name</span>
-            <strong>{pharmacy?.name || "N/A"}</strong>
+            <strong>{pharmacy.name}</strong>
           </div>
 
           <div className="info-card">
             <span>Phone</span>
-            <strong>{pharmacy?.phone || "N/A"}</strong>
+            <strong>{pharmacy.phone}</strong>
           </div>
 
           <div className="info-card">
             <span>Address</span>
-            <strong>{pharmacy?.address || "N/A"}</strong>
+            <strong>{pharmacy.address}</strong>
           </div>
+
         </div>
       </section>
 
+
       {/* Inventory */}
       <section className="section">
+
         <div className="section-header">
           <h2>Inventory Overview</h2>
 
-          <button className="secondary-button">
+          <button
+            className="secondary-button"
+            onClick={() => navigate("/pharmacy/inventory")}
+          >
             Manage Inventory
           </button>
         </div>
+
 
         <div className="stats-grid">
 
           <div className="stat-card">
             <div className="stat-icon">M</div>
+
             <div>
               <span>Available Medicines</span>
-              <strong>{inventory?.availableMedicines ?? 0}</strong>
+              <strong>{inventory.availableMedicines}</strong>
             </div>
           </div>
+
 
           <div className="stat-card">
             <div className="stat-icon">S</div>
+
             <div>
               <span>Total Stock</span>
-              <strong>{inventory?.totalStock ?? 0}</strong>
+              <strong>{inventory.totalStock}</strong>
             </div>
           </div>
 
+
           <div className="stat-card">
             <div className="stat-icon">L</div>
+
             <div>
               <span>Low Stock</span>
-              <strong>{inventory?.lowStock ?? 0}</strong>
+              <strong>{inventory.lowStock}</strong>
             </div>
           </div>
 
         </div>
 
-        {inventory?.availableMedicines === 0 && (
+
+        {inventory.availableMedicines === 0 && (
           <div className="empty-state">
+
             <h3>No inventory yet</h3>
+
             <p>
               Add medicines to your inventory to see them here.
             </p>
 
-            <button className="primary-button">
+            <button
+              className="primary-button"
+              onClick={() => navigate("/pharmacy/inventory")}
+            >
               Add Medicine
             </button>
+
           </div>
         )}
+
       </section>
+
 
       {/* Reservations */}
       <section className="section">
+
         <div className="section-header">
+
           <h2>Reservations</h2>
 
-          <button className="secondary-button">
+          <button
+            className="secondary-button"
+            onClick={() => navigate("/pharmacy/reservation")}
+          >
             View Reservations
           </button>
+
         </div>
+
 
         <div className="reservation-grid">
 
           <div className="reservation-card">
             <span>Pending</span>
-            <strong>{reservations?.pending ?? 0}</strong>
+            <strong>{reservations.pending}</strong>
           </div>
 
           <div className="reservation-card">
             <span>Confirmed</span>
-            <strong>{reservations?.confirmed ?? 0}</strong>
+            <strong>{reservations.confirmed}</strong>
           </div>
 
           <div className="reservation-card">
             <span>Completed</span>
-            <strong>{reservations?.completed ?? 0}</strong>
+            <strong>{reservations.completed}</strong>
           </div>
 
           <div className="reservation-card">
             <span>Cancelled</span>
-            <strong>{reservations?.cancelled ?? 0}</strong>
+            <strong>{reservations.cancelled}</strong>
           </div>
 
         </div>
 
-        {reservations?.total === 0 && (
+
+        {reservations.total === 0 && (
           <div className="empty-state">
+
             <h3>No reservations</h3>
+
             <p>
               There are currently no reservations for your pharmacy.
             </p>
+
           </div>
         )}
+
       </section>
+
 
       {/* Quick Navigation */}
       <section className="section">
+
         <div className="section-header">
           <h2>Quick Access</h2>
         </div>
 
+
         <div className="quick-links">
 
-          <button className="quick-link">
+          <button
+            className="quick-link"
+            onClick={() => navigate("/pharmacy/profile")}
+          >
             <strong>Pharmacy Profile</strong>
-            <span>View and edit pharmacy information</span>
+
+            <span>
+              View and edit pharmacy information
+            </span>
           </button>
 
-          <button className="quick-link">
+
+          <button
+            className="quick-link"
+            onClick={() => navigate("/pharmacy/inventory")}
+          >
             <strong>Inventory Management</strong>
-            <span>Manage available medicines and stock</span>
+
+            <span>
+              Manage available medicines and stock
+            </span>
           </button>
 
-          <button className="quick-link">
+
+          <button
+            className="quick-link"
+            onClick={() => navigate("/pharmacy/reservation")}
+          >
             <strong>Reservation Management</strong>
-            <span>View and manage reservations</span>
+
+            <span>
+              View and manage reservations
+            </span>
           </button>
 
-          <button className="quick-link">
+
+          <button
+            className="quick-link"
+            onClick={() => navigate("/pharmacy/notifications")}
+          >
             <strong>Notifications</strong>
-            <span>View pharmacy notifications</span>
+
+            <span>
+              View pharmacy notifications
+            </span>
           </button>
 
         </div>
+
       </section>
 
     </div>
