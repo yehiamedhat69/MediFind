@@ -1,7 +1,9 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+
+// Use the User model from the Database folder
+const User = require("../../../Database/models/User");
 
 const router = express.Router();
 
@@ -28,30 +30,31 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Database User model uses "name" instead of "username"
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
+      email: email.toLowerCase(),
     });
 
     if (existingUser) {
       return res.status(409).json({
-        message: "Username or email already exists",
+        message: "Email already exists",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      username,
-      email,
+      name: username,
+      email: email.toLowerCase(),
       password: hashedPassword,
-      role: role || "user",
+      role: role || "customer",
     });
 
     res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user._id,
-        username: user.username,
+        username: user.name,
         email: user.email,
         role: user.role,
       },
@@ -75,7 +78,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -94,7 +99,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id,
-        username: user.username,
+        username: user.name,
         role: user.role,
       },
       process.env.JWT_SECRET,
@@ -108,7 +113,7 @@ router.post("/login", async (req, res) => {
       token,
       user: {
         id: user._id,
-        username: user.username,
+        username: user.name,
         email: user.email,
         role: user.role,
       },
